@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://tlsh0sjpahdg"]
+
+[ext_resource type="Script" uid="uid://4ksr0xqyi1n1" path="res://jugador.gd" id="1_6ba58"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6ba58"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_lgngo"]
+sky_material = SubResource("ProceduralSkyMaterial_6ba58")
+
+[sub_resource type="Environment" id="Environment_fw4w5"]
+background_mode = 2
+sky = SubResource("Sky_lgngo")
+glow_enabled = true
+
+[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_jgspf"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_jgspf"]
+size = Vector2(1000, 1000)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_jgspf"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jgspf"]
+
+[node name="Mundo" type="Node3D" unique_id=2943470]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1132857722]
+environment = SubResource("Environment_fw4w5")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=578484382]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, -0.06532788, 4.658226, -0.5873625)
+shadow_enabled = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1066330461]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1625398371]
+shape = SubResource("WorldBoundaryShape3D_jgspf")
+debug_color = Color(0.69899064, 1.4273612, 0, 1)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1143063344]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.03132987, 0.0033119917, 0.0030799508)
+mesh = SubResource("PlaneMesh_jgspf")
+
+[node name="Jugador" type="CharacterBody3D" parent="." unique_id=974224794]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.148101, 0)
+script = ExtResource("1_6ba58")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Jugador" unique_id=1733383426]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.23432183, 0)
+mesh = SubResource("CapsuleMesh_jgspf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Jugador" unique_id=1642535236]
+shape = SubResource("CapsuleShape3D_jgspf")
+
+[node name="Camera3D" type="Camera3D" parent="Jugador" unique_id=1593370108]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.013967305, 0.68216395, 0.20926774)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=68335455]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.65423155, 0.6848825, -3.6450357)
+use_collision = true
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="." unique_id=1053343682]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9059267, 1.8720533, -3.6450357)
+use_collision = true
+size = Vector3(1, 1.0184326, 1)
