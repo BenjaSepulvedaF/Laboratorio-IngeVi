@@ -3,6 +3,7 @@
 **Asignatura:** Ingeniería de Videojuegos: Fundamentos y Aplicaciones Interactivas (USACH)  
 **Entrega:** LAB 2 – Prototipo de Escena Base  
 **Nombre del equipo:** CTM Lovers 
+
 **Integrantes:** Benjamín Sepúlveda, Bastian Brito  
 **Nombre del proyecto:** El Juego CTM  
 **Motor utilizado:** Godot Engine v4.7.2-stable (Renderer Forward+, Jolt Physics 3D)  
