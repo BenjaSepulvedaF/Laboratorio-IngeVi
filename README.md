@@ -1,6 +1,36 @@
 # El corazón del volcán
 
-Juego de parkour 3D para Godot 4.7, construido con geometría, materiales y animaciones del motor. Abre `project.godot` y ejecuta el proyecto con **F5**. Aparecerás en `spawn.tscn`; camina hasta la puerta **Parkour** para entrar al nivel `mundo.tscn`. No necesita paquetes externos.
+**Asignatura:** Ingeniería de Videojuegos: Fundamentos y Aplicaciones Interactivas (USACH)  
+**Entrega:** LAB 2 – Prototipo de Escena Base  
+**Nombre del equipo:** [NOMBRE DEL EQUIPO]  
+**Integrantes:** Benjamín Sepúlveda, Bastian Brito, [NOMBRE INTEGRANTE 3], [NOMBRE INTEGRANTE 4]  
+**Nombre del proyecto:** El corazón del volcán  
+**Motor utilizado:** Godot Engine v4.7.2-stable (Renderer Forward+, Jolt Physics 3D)  
+
+---
+
+## Instrucciones para abrir y ejecutar el proyecto
+
+1. Descargar e instalar **Godot 4.7** (o ejecutar la versión portable de Godot 4.7.x).
+2. Abrir el administrador de proyectos de Godot (*Project Manager*), presionar **Importar** y seleccionar el archivo `project.godot` ubicado en la raíz de este repositorio.
+3. Presionar **F5** (o el botón **Ejecutar proyecto** en la barra superior derecha).
+4. El juego iniciará en la escena de vestíbulo inicial (`res://spawn.tscn`). El personaje aparecerá en la plaza del spawn; desde allí, camina hacia el portal identificado con el texto **Parkour** para ingresar al nivel volcánico (`res://mundo.tscn`).
+5. Para regresar al vestíbulo desde el nivel de parkour, cruza la puerta identificada como **Inicio** en la isla de partida.
+6. *(Nota: si en el editor estás editando `mundo.tscn` y presionas **F6**, se ejecutará solo esa escena. Usa siempre **F5** para iniciar el flujo completo desde el spawn).*
+
+No se requieren paquetes, plugins ni dependencias externas.
+
+---
+
+## Control de versiones y exclusiones (.gitignore)
+
+El repositorio cuenta con un archivo `.gitignore` configurado adecuadamente para proyectos en Godot Engine. Este archivo ignora de forma obligatoria carpetas pesadas y temporales generadas automáticamente por el motor:
+- **`.godot/`:** Carpeta equivalente a `Library/` en Unity o `Intermediate/` en Unreal Engine. Contiene la caché de importación de recursos, mallas precompiladas, texturas procesadas y metadatos locales. Ignorarla evita sobrecargar el repositorio y previene conflictos de sincronización entre distintas máquinas.
+- **`/android/`:** Carpeta temporal de compilación móvil (si aplica).
+
+---
+
+## Descripción del proyecto
 
 ## Objetivo y controles
 
