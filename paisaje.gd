@@ -14,14 +14,25 @@ func _ready() -> void:
 	rng.seed = 22062026
 	var roca := StandardMaterial3D.new()
 	roca.vertex_color_use_as_albedo = true
-	roca.roughness = 1.0
+	roca.albedo_texture = preload("res://texturas/basalto/Rock035_1K-JPG_Color.jpg")
+	roca.normal_enabled = true
+	roca.normal_scale = 1.3
+	roca.normal_texture = preload("res://texturas/basalto/Rock035_1K-JPG_NormalGL.jpg")
+	roca.roughness_texture = preload("res://texturas/basalto/Rock035_1K-JPG_Roughness.jpg")
+	roca.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_ALPHA
+	roca.ao_enabled = true
+	roca.ao_texture = preload("res://texturas/basalto/Rock035_1K-JPG_AmbientOcclusion.jpg")
+	roca.uv1_triplanar = true
+	roca.uv1_triplanar_sharpness = 4.0
+	roca.uv1_scale = Vector3(0.06, 0.06, 0.06)
 	# El volcán es un cono truncado irregular con cráter, no una montaña sólida.
 	_relieve(geometria, Vector3(0, -4, -127), 36.0, 32.0, 6.0, roca, rng)
 	var fuego := StandardMaterial3D.new()
-	fuego.albedo_color = Color(0.9, 0.16, 0.015)
+	fuego.albedo_texture = preload("res://texturas/lava/Lava004_1K-JPG_Color.jpg")
 	fuego.emission_enabled = true
-	fuego.emission = Color(1, 0.16, 0.01)
-	fuego.emission_energy_multiplier = 3.0
+	fuego.emission_texture = preload("res://texturas/lava/Lava004_1K-JPG_Emission.jpg")
+	fuego.emission_energy_multiplier = 4.0
+	fuego.uv1_scale = Vector3(2, 2, 2)
 	var crater := CylinderMesh.new()
 	crater.top_radius = 5.7
 	crater.bottom_radius = 5.7
@@ -33,8 +44,16 @@ func _ready() -> void:
 		var posicion := Vector3(lado * rng.randf_range(28, 55), -5, 10 - i * 9)
 		_relieve(geometria, posicion, rng.randf_range(14, 23), rng.randf_range(12, 24), rng.randf_range(1, 4), roca, rng)
 	var basalto := StandardMaterial3D.new()
-	basalto.albedo_color = Color(0.16, 0.15, 0.18)
-	basalto.roughness = 0.95
+	basalto.albedo_color = Color(0.75, 0.7, 0.75)
+	basalto.albedo_texture = preload("res://texturas/basalto/Rock035_1K-JPG_Color.jpg")
+	basalto.normal_enabled = true
+	basalto.normal_scale = 1.3
+	basalto.normal_texture = preload("res://texturas/basalto/Rock035_1K-JPG_NormalGL.jpg")
+	basalto.roughness_texture = preload("res://texturas/basalto/Rock035_1K-JPG_Roughness.jpg")
+	basalto.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_ALPHA
+	basalto.uv1_triplanar = true
+	basalto.uv1_triplanar_sharpness = 4.0
+	basalto.uv1_scale = Vector3(0.25, 0.25, 0.25)
 	for i in range(65):
 		var columna := CylinderMesh.new()
 		columna.radial_segments = 6

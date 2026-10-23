@@ -1,6 +1,6 @@
 # El corazón del volcán
 
-Juego de parkour 3D para Godot 4.7, construido con geometría, materiales y animaciones del motor. Abre `project.godot` y ejecuta el proyecto con **F5** para iniciar la escena principal `mundo.tscn`. No necesita paquetes externos.
+Juego de parkour 3D para Godot 4.7, construido con geometría, materiales y animaciones del motor. Abre `project.godot` y ejecuta el proyecto con **F5**. Aparecerás en `spawn.tscn`; camina hasta la puerta **Parkour** para entrar al nivel `mundo.tscn`. No necesita paquetes externos.
 
 ## Objetivo y controles
 
@@ -27,6 +27,7 @@ El orbe flota en la espalda mientras se transporta. En primera persona se oculta
 - `jugador.gd` controla movimiento, salto, viento, cámaras y los estados normal, colgado, escalando y bloqueado.
 - `personaje.gd` construye y anima el personaje articulado; `orbe.tscn` y `orbe.gd` comparten el aspecto y la animación del orbe.
 - `mundo.tscn` contiene los apoyos y sus colisiones editables. `paisaje.gd` construye decoración determinista y `lava.gdshader` anima la lava.
+- `parkour_generador.gd` coloca los apoyos del parkour de forma aleatoria al entrar al nivel. Cada apoyo queda al alcance del anterior y la dificultad sube por sector. Los parámetros de distancia, altura y giro están en el script; `semilla` fija un mapa concreto.
 - `altar.gd` comunica interacciones por proximidad; `interfaz.gd` presenta los menús y las instrucciones.
 
 Capas físicas: **1** sólidos, **2** superficies agarrables, **3** jugador. Los apoyos e isla pertenecen a las capas 1 y 2; los pedestales solo a la 1. La decoración no tiene colisión. El área de lava detecta al jugador y existe además un límite de altura para caídas fuera del mapa.

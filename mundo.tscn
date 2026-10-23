@@ -9,6 +9,23 @@
 [ext_resource type="Script" path="res://paisaje.gd" id="7_paisaje"]
 [ext_resource type="Shader" path="res://lava.gdshader" id="8_lava"]
 [ext_resource type="PackedScene" path="res://orbe.tscn" id="9_orbe"]
+[ext_resource type="Script" path="res://parkour_generador.gd" id="10_generador"]
+[ext_resource type="PackedScene" path="res://puerta.tscn" id="11_puerta"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_Color.jpg" id="12_basalto_color"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_NormalGL.jpg" id="13_basalto_normal"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_Roughness.jpg" id="14_basalto_rough"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_AmbientOcclusion.jpg" id="15_basalto_ao"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_Color.jpg" id="16_sup_color"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_NormalGL.jpg" id="17_sup_normal"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_Roughness.jpg" id="18_sup_rough"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_AmbientOcclusion.jpg" id="19_sup_ao"]
+[ext_resource type="Texture2D" path="res://texturas/altar/Marble012_1K-JPG_Color.jpg" id="20_altar_color"]
+[ext_resource type="Texture2D" path="res://texturas/altar/Marble012_1K-JPG_NormalGL.jpg" id="21_altar_normal"]
+[ext_resource type="Texture2D" path="res://texturas/altar/Marble012_1K-JPG_Roughness.jpg" id="22_altar_rough"]
+[ext_resource type="Texture2D" path="res://texturas/lava/Lava004_1K-JPG_Color.jpg" id="23_lava_color"]
+[ext_resource type="Texture2D" path="res://texturas/lava/Lava004_1K-JPG_NormalGL.jpg" id="24_lava_normal"]
+[ext_resource type="Texture2D" path="res://texturas/lava/Lava004_1K-JPG_Emission.jpg" id="25_lava_emision"]
+[ext_resource type="Texture2D" path="res://texturas/lava/Lava004_1K-JPG_Roughness.jpg" id="26_lava_rough"]
 
 [sub_resource type="ProceduralSkyMaterial" id="CieloMaterial"]
 sky_top_color = Color(0.075, 0.065, 0.12, 1)
@@ -33,26 +50,63 @@ fog_light_color = Color(0.43, 0.24, 0.23, 1)
 fog_density = 0.005
 
 [sub_resource type="StandardMaterial3D" id="Basalto"]
-albedo_color = Color(0.23, 0.22, 0.26, 1)
-roughness = 0.95
+albedo_color = Color(0.85, 0.8, 0.8, 1)
+albedo_texture = ExtResource("12_basalto_color")
+roughness_texture = ExtResource("14_basalto_rough")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_scale = 1.4
+normal_texture = ExtResource("13_basalto_normal")
+ao_enabled = true
+ao_texture = ExtResource("15_basalto_ao")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+uv1_scale = Vector3(0.3, 0.3, 0.3)
 
 [sub_resource type="StandardMaterial3D" id="Superficie"]
-albedo_color = Color(0.4, 0.42, 0.45, 1)
-roughness = 0.9
+albedo_color = Color(0.95, 0.92, 0.9, 1)
+albedo_texture = ExtResource("16_sup_color")
+roughness_texture = ExtResource("18_sup_rough")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_scale = 1.2
+normal_texture = ExtResource("17_sup_normal")
+ao_enabled = true
+ao_texture = ExtResource("19_sup_ao")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="Guia"]
-albedo_color = Color(0.95, 0.62, 0.25, 1)
+albedo_color = Color(1, 0.65, 0.2, 1)
+roughness = 0.3
 emission_enabled = true
-emission = Color(0.65, 0.23, 0.04, 1)
-emission_energy_multiplier = 0.6
+emission = Color(1, 0.45, 0.05, 1)
+emission_energy_multiplier = 2.0
 
 [sub_resource type="StandardMaterial3D" id="AltarMaterial"]
-albedo_color = Color(0.25, 0.27, 0.33, 1)
-metallic = 0.45
-roughness = 0.55
+albedo_color = Color(0.9, 0.9, 0.95, 1)
+albedo_texture = ExtResource("20_altar_color")
+roughness_texture = ExtResource("22_altar_rough")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_scale = 1.5
+normal_texture = ExtResource("21_altar_normal")
+metallic = 0.2
+uv1_triplanar = true
+uv1_scale = Vector3(0.8, 0.8, 0.8)
 
 [sub_resource type="ShaderMaterial" id="LavaMaterial"]
 shader = ExtResource("8_lava")
+shader_parameter/color_costra = Color(0.06, 0.02, 0.02, 1)
+shader_parameter/color_lava = Color(1, 0.35, 0.02, 1)
+shader_parameter/escala = 80.0
+shader_parameter/velocidad = 0.04
+shader_parameter/escala_textura = 25.0
+shader_parameter/textura_albedo = ExtResource("23_lava_color")
+shader_parameter/textura_normal = ExtResource("24_lava_normal")
+shader_parameter/textura_emision = ExtResource("25_lava_emision")
+shader_parameter/textura_rugosidad = ExtResource("26_lava_rough")
 
 [sub_resource type="PlaneMesh" id="LavaMalla"]
 material = SubResource("LavaMaterial")
@@ -528,6 +582,7 @@ script = ExtResource("3_personaje")
 script = ExtResource("4_interfaz")
 
 [node name="Parkour" type="Node3D" parent="."]
+script = ExtResource("10_generador")
 
 [node name="Apoyo01" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
 position = Vector3(0, 2.6, -7)
@@ -1184,3 +1239,9 @@ billboard = 1
 text = "≈ Ráfagas de viento ≈"
 font_size = 24
 modulate = Color(0.85, 0.8, 0.7, 1)
+
+[node name="PuertaSpawn" parent="." instance=ExtResource("11_puerta")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 3, 4.2)
+escena = "res://spawn.tscn"
+marca_inicio = false
+texto = "Inicio"

@@ -1,0 +1,279 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://spawn.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://jugador.gd" id="2_jugador"]
+[ext_resource type="Script" path="res://personaje.gd" id="3_personaje"]
+[ext_resource type="PackedScene" path="res://puerta.tscn" id="4_puerta"]
+[ext_resource type="Texture2D" path="res://texturas/cesped/Grass001_1K-JPG_Color.jpg" id="5_cesped_color"]
+[ext_resource type="Texture2D" path="res://texturas/cesped/Grass001_1K-JPG_NormalGL.jpg" id="6_cesped_normal"]
+[ext_resource type="Texture2D" path="res://texturas/cesped/Grass001_1K-JPG_Roughness.jpg" id="7_cesped_rough"]
+[ext_resource type="Texture2D" path="res://texturas/cesped/Grass001_1K-JPG_AmbientOcclusion.jpg" id="8_cesped_ao"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_Color.jpg" id="9_piedra_color"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_NormalGL.jpg" id="10_piedra_normal"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_Roughness.jpg" id="11_piedra_rough"]
+[ext_resource type="Texture2D" path="res://texturas/basalto/Rock035_1K-JPG_AmbientOcclusion.jpg" id="12_piedra_ao"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_Color.jpg" id="13_clara_color"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_NormalGL.jpg" id="14_clara_normal"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_Roughness.jpg" id="15_clara_rough"]
+[ext_resource type="Texture2D" path="res://texturas/superficie/PavingStones138_1K-JPG_AmbientOcclusion.jpg" id="16_clara_ao"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Cielo_material"]
+sky_top_color = Color(0.25, 0.4, 0.65, 1)
+sky_horizon_color = Color(0.9, 0.75, 0.6, 1)
+ground_bottom_color = Color(0.18, 0.24, 0.16, 1)
+ground_horizon_color = Color(0.9, 0.75, 0.6, 1)
+
+[sub_resource type="Sky" id="Cielo"]
+sky_material = SubResource("Cielo_material")
+
+[sub_resource type="Environment" id="Environment_spawn"]
+background_mode = 2
+sky = SubResource("Cielo")
+ambient_light_source = 3
+ambient_light_energy = 0.9
+glow_enabled = true
+fog_enabled = true
+fog_light_color = Color(0.9, 0.78, 0.65, 1)
+fog_density = 0.005
+
+[sub_resource type="BoxShape3D" id="Suelo_forma"]
+size = Vector3(80, 1, 80)
+
+[sub_resource type="BoxMesh" id="Suelo_malla"]
+size = Vector3(80, 1, 80)
+
+[sub_resource type="StandardMaterial3D" id="Cesped"]
+albedo_color = Color(0.85, 0.95, 0.8, 1)
+albedo_texture = ExtResource("5_cesped_color")
+roughness_texture = ExtResource("7_cesped_rough")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_scale = 1.3
+normal_texture = ExtResource("6_cesped_normal")
+ao_enabled = true
+ao_texture = ExtResource("8_cesped_ao")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 3.0
+uv1_scale = Vector3(0.18, 0.18, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="Piedra"]
+albedo_color = Color(0.85, 0.85, 0.85, 1)
+albedo_texture = ExtResource("9_piedra_color")
+roughness_texture = ExtResource("11_piedra_rough")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_scale = 1.4
+normal_texture = ExtResource("10_piedra_normal")
+ao_enabled = true
+ao_texture = ExtResource("12_piedra_ao")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+uv1_scale = Vector3(0.3, 0.3, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="PiedraClara"]
+albedo_color = Color(0.95, 0.95, 0.95, 1)
+albedo_texture = ExtResource("13_clara_color")
+roughness_texture = ExtResource("15_clara_rough")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_scale = 1.2
+normal_texture = ExtResource("14_clara_normal")
+ao_enabled = true
+ao_texture = ExtResource("16_clara_ao")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 3.0
+uv1_scale = Vector3(0.3, 0.3, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Brasero"]
+albedo_color = Color(1, 0.5, 0.15, 1)
+emission_enabled = true
+emission = Color(1, 0.4, 0.1, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="StandardMaterial3D" id="Cristal"]
+albedo_color = Color(1, 0.35, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.3, 0.05, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="CapsuleShape3D" id="Capsula_spawn"]
+
+[sub_resource type="ParticleProcessMaterial" id="Brasas_proceso"]
+emission_shape = 3
+emission_box_extents = Vector3(6, 0.5, 6)
+direction = Vector3(0, 1, 0)
+spread = 20.0
+initial_velocity_min = 0.3
+initial_velocity_max = 0.9
+gravity = Vector3(0, 0.2, 0)
+
+[sub_resource type="StandardMaterial3D" id="Brasa_material"]
+albedo_color = Color(1, 0.6, 0.2, 1)
+emission_enabled = true
+emission = Color(1, 0.5, 0.1, 1)
+emission_energy_multiplier = 3.0
+shading_mode = 0
+
+[sub_resource type="SphereMesh" id="Brasa_malla"]
+radius = 0.04
+height = 0.08
+material = SubResource("Brasa_material")
+
+[node name="Spawn" type="Node3D"]
+script = ExtResource("1_spawn")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_spawn")
+
+[node name="Sol" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 8, 0)
+light_color = Color(1, 0.9, 0.75, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Suelo" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Suelo"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("Suelo_forma")
+
+[node name="Malla" type="MeshInstance3D" parent="Suelo"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("Suelo_malla")
+surface_material_override/0 = SubResource("Cesped")
+
+[node name="Plaza" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+radius = 6.0
+height = 0.2
+use_collision = true
+material = SubResource("PiedraClara")
+
+[node name="Monumento" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+radius = 1.6
+height = 0.6
+use_collision = true
+material = SubResource("Piedra")
+
+[node name="Cristal" type="CSGSphere3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+radius = 0.6
+material = SubResource("Cristal")
+
+[node name="LuzCristal" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+light_color = Color(1, 0.5, 0.2, 1)
+omni_range = 10.0
+light_energy = 1.5
+
+[node name="Brasas" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+amount = 60
+lifetime = 4.0
+process_material = SubResource("Brasas_proceso")
+draw_pass_1 = SubResource("Brasa_malla")
+
+[node name="Pilar1" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, -3)
+radius = 0.5
+height = 4.0
+use_collision = true
+material = SubResource("Piedra")
+
+[node name="Brasero1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 4.15, -3)
+size = Vector3(0.8, 0.3, 0.8)
+material = SubResource("Brasero")
+
+[node name="Luz1" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 4.8, -3)
+light_color = Color(1, 0.6, 0.3, 1)
+omni_range = 8.0
+light_energy = 1.2
+
+[node name="Pilar2" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2, -3)
+radius = 0.5
+height = 4.0
+use_collision = true
+material = SubResource("Piedra")
+
+[node name="Brasero2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4.15, -3)
+size = Vector3(0.8, 0.3, 0.8)
+material = SubResource("Brasero")
+
+[node name="Luz2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4.8, -3)
+light_color = Color(1, 0.6, 0.3, 1)
+omni_range = 8.0
+light_energy = 1.2
+
+[node name="Pilar3" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, 4)
+radius = 0.5
+height = 4.0
+use_collision = true
+material = SubResource("Piedra")
+
+[node name="Brasero3" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 4.15, 4)
+size = Vector3(0.8, 0.3, 0.8)
+material = SubResource("Brasero")
+
+[node name="Luz3" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 4.8, 4)
+light_color = Color(1, 0.6, 0.3, 1)
+omni_range = 8.0
+light_energy = 1.2
+
+[node name="Pilar4" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2, 4)
+radius = 0.5
+height = 4.0
+use_collision = true
+material = SubResource("Piedra")
+
+[node name="Brasero4" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4.15, 4)
+size = Vector3(0.8, 0.3, 0.8)
+material = SubResource("Brasero")
+
+[node name="Luz4" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4.8, 4)
+light_color = Color(1, 0.6, 0.3, 1)
+omni_range = 8.0
+light_energy = 1.2
+
+[node name="Jugador" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 6)
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("2_jugador")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Jugador"]
+shape = SubResource("Capsula_spawn")
+
+[node name="CameraPivot" type="Node3D" parent="Jugador"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+rotation = Vector3(-0.22, 0, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Jugador/CameraPivot"]
+spring_length = 4.0
+collision_mask = 3
+margin = 0.15
+
+[node name="Camera3D" type="Camera3D" parent="Jugador/CameraPivot/SpringArm3D"]
+current = true
+fov = 75.0
+near = 0.05
+far = 500.0
+
+[node name="Visual" type="Node3D" parent="Jugador"]
+script = ExtResource("3_personaje")
+
+[node name="Puerta" parent="." instance=ExtResource("4_puerta")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9)
+escena = "res://mundo.tscn"
+texto = "Parkour"

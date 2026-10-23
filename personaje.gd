@@ -20,6 +20,13 @@ const COLOR_ZAPATO := Color(0.1, 0.08, 0.06)
 const COLOR_PELO := Color(0.25, 0.15, 0.08)
 const ORBE = preload("res://orbe.tscn")
 
+const TEX_ROPA_NORMAL = preload("res://texturas/ropa/Fabric085_1K-JPG_NormalGL.jpg")
+const TEX_ROPA_ROUGH = preload("res://texturas/ropa/Fabric085_1K-JPG_Roughness.jpg")
+const TEX_ROPA_AO = preload("res://texturas/ropa/Fabric085_1K-JPG_AmbientOcclusion.jpg")
+
+const TEX_CUERO_NORMAL = preload("res://texturas/cuero/Leather037_1K-JPG_NormalGL.jpg")
+const TEX_CUERO_ROUGH = preload("res://texturas/cuero/Leather037_1K-JPG_Roughness.jpg")
+
 const PELVIS_Y := -0.09      # hace que los pies toquen el suelo (y = -1.0 del jugador)
 const FREC_PASO := 1.6       # pasos por metro recorrido, aproximado
 const SUAVIZADO := 12.0      # velocidad con la que las articulaciones llegan a su objetivo
@@ -46,10 +53,10 @@ func _ready() -> void:
 		hijo.free()
 
 	pelvis = _articulacion(self, Vector3(0, PELVIS_Y, 0))
-	_pieza(pelvis, Vector3(0.42, 0.2, 0.26), Vector3.ZERO, COLOR_PANTALON)
+	_pieza(pelvis, Vector3(0.42, 0.2, 0.26), Vector3.ZERO, COLOR_PANTALON, "ropa")
 
 	torso = _articulacion(pelvis, Vector3(0, 0.1, 0))
-	_pieza(torso, Vector3(0.5, 0.6, 0.28), Vector3(0, 0.3, 0), COLOR_CAMISA)
+	_pieza(torso, Vector3(0.5, 0.6, 0.28), Vector3(0, 0.3, 0), COLOR_CAMISA, "ropa")
 	orbe_espalda = ORBE.instantiate()
 	orbe_espalda.name = "OrbeEspalda"
 	orbe_espalda.position = Vector3(0, 0.34, 0.4)
@@ -58,30 +65,30 @@ func _ready() -> void:
 	torso.add_child(orbe_espalda)
 
 	cabeza = _articulacion(torso, Vector3(0, 0.6, 0))
-	_pieza(cabeza, Vector3(0.3, 0.3, 0.3), Vector3(0, 0.15, 0), COLOR_PIEL)
-	_pieza(cabeza, Vector3(0.32, 0.1, 0.32), Vector3(0, 0.28, 0), COLOR_PELO)
+	_pieza(cabeza, Vector3(0.3, 0.3, 0.3), Vector3(0, 0.15, 0), COLOR_PIEL, "piel")
+	_pieza(cabeza, Vector3(0.32, 0.1, 0.32), Vector3(0, 0.28, 0), COLOR_PELO, "pelo")
 
 	brazo_izq = _articulacion(torso, Vector3(-0.34, 0.55, 0))
-	_pieza(brazo_izq, Vector3(0.14, 0.3, 0.14), Vector3(0, -0.15, 0), COLOR_CAMISA)
+	_pieza(brazo_izq, Vector3(0.14, 0.3, 0.14), Vector3(0, -0.15, 0), COLOR_CAMISA, "ropa")
 	antebrazo_izq = _articulacion(brazo_izq, Vector3(0, -0.3, 0))
-	_pieza(antebrazo_izq, Vector3(0.12, 0.28, 0.12), Vector3(0, -0.14, 0), COLOR_PIEL)
+	_pieza(antebrazo_izq, Vector3(0.12, 0.28, 0.12), Vector3(0, -0.14, 0), COLOR_PIEL, "piel")
 
 	brazo_der = _articulacion(torso, Vector3(0.34, 0.55, 0))
-	_pieza(brazo_der, Vector3(0.14, 0.3, 0.14), Vector3(0, -0.15, 0), COLOR_CAMISA)
+	_pieza(brazo_der, Vector3(0.14, 0.3, 0.14), Vector3(0, -0.15, 0), COLOR_CAMISA, "ropa")
 	antebrazo_der = _articulacion(brazo_der, Vector3(0, -0.3, 0))
-	_pieza(antebrazo_der, Vector3(0.12, 0.28, 0.12), Vector3(0, -0.14, 0), COLOR_PIEL)
+	_pieza(antebrazo_der, Vector3(0.12, 0.28, 0.12), Vector3(0, -0.14, 0), COLOR_PIEL, "piel")
 
 	pierna_izq = _articulacion(pelvis, Vector3(-0.11, 0, 0))
-	_pieza(pierna_izq, Vector3(0.18, 0.45, 0.18), Vector3(0, -0.225, 0), COLOR_PANTALON)
+	_pieza(pierna_izq, Vector3(0.18, 0.45, 0.18), Vector3(0, -0.225, 0), COLOR_PANTALON, "ropa")
 	pantorrilla_izq = _articulacion(pierna_izq, Vector3(0, -0.45, 0))
-	_pieza(pantorrilla_izq, Vector3(0.16, 0.42, 0.16), Vector3(0, -0.21, 0), COLOR_PANTALON)
-	_pieza(pantorrilla_izq, Vector3(0.2, 0.08, 0.3), Vector3(0, -0.42, 0.05), COLOR_ZAPATO)
+	_pieza(pantorrilla_izq, Vector3(0.16, 0.42, 0.16), Vector3(0, -0.21, 0), COLOR_PANTALON, "ropa")
+	_pieza(pantorrilla_izq, Vector3(0.2, 0.08, 0.3), Vector3(0, -0.42, 0.05), COLOR_ZAPATO, "cuero")
 
 	pierna_der = _articulacion(pelvis, Vector3(0.11, 0, 0))
-	_pieza(pierna_der, Vector3(0.18, 0.45, 0.18), Vector3(0, -0.225, 0), COLOR_PANTALON)
+	_pieza(pierna_der, Vector3(0.18, 0.45, 0.18), Vector3(0, -0.225, 0), COLOR_PANTALON, "ropa")
 	pantorrilla_der = _articulacion(pierna_der, Vector3(0, -0.45, 0))
-	_pieza(pantorrilla_der, Vector3(0.16, 0.42, 0.16), Vector3(0, -0.21, 0), COLOR_PANTALON)
-	_pieza(pantorrilla_der, Vector3(0.2, 0.08, 0.3), Vector3(0, -0.42, 0.05), COLOR_ZAPATO)
+	_pieza(pantorrilla_der, Vector3(0.16, 0.42, 0.16), Vector3(0, -0.21, 0), COLOR_PANTALON, "ropa")
+	_pieza(pantorrilla_der, Vector3(0.2, 0.08, 0.3), Vector3(0, -0.42, 0.05), COLOR_ZAPATO, "cuero")
 
 
 # Llamado desde jugador.gd cada frame.
@@ -147,11 +154,33 @@ func _articulacion(padre: Node3D, pos: Vector3) -> Node3D:
 	return n
 
 
-func _pieza(padre: Node3D, tam: Vector3, desplazamiento: Vector3, color: Color) -> void:
+func _pieza(padre: Node3D, tam: Vector3, desplazamiento: Vector3, color: Color, tipo: String = "piel") -> void:
 	var caja := BoxMesh.new()
 	caja.size = tam
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
+	if tipo == "ropa":
+		mat.normal_enabled = true
+		mat.normal_scale = 1.0
+		mat.normal_texture = TEX_ROPA_NORMAL
+		mat.roughness_texture = TEX_ROPA_ROUGH
+		mat.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_ALPHA
+		mat.ao_enabled = true
+		mat.ao_texture = TEX_ROPA_AO
+		mat.uv1_triplanar = true
+		mat.uv1_scale = Vector3(5.0, 5.0, 5.0)
+	elif tipo == "cuero":
+		mat.normal_enabled = true
+		mat.normal_scale = 1.2
+		mat.normal_texture = TEX_CUERO_NORMAL
+		mat.roughness_texture = TEX_CUERO_ROUGH
+		mat.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_ALPHA
+		mat.uv1_triplanar = true
+		mat.uv1_scale = Vector3(5.0, 5.0, 5.0)
+	elif tipo == "piel":
+		mat.roughness = 0.65
+	elif tipo == "pelo":
+		mat.roughness = 0.85
 	caja.material = mat
 	var malla := MeshInstance3D.new()
 	malla.mesh = caja
