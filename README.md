@@ -3,7 +3,7 @@
 **Asignatura:** Ingeniería de Videojuegos: Fundamentos y Aplicaciones Interactivas (USACH)  
 **Entrega:** LAB 2 – Prototipo de Escena Base  
 **Nombre del equipo:** [NOMBRE DEL EQUIPO]  
-**Integrantes:** Benjamín Sepúlveda, Bastian Brito, [NOMBRE INTEGRANTE 3], [NOMBRE INTEGRANTE 4]  
+**Integrantes:** Benjamín Sepúlveda, Bastian Brito  
 **Nombre del proyecto:** El corazón del volcán  
 **Motor utilizado:** Godot Engine v4.7.2-stable (Renderer Forward+, Jolt Physics 3D)  
 
