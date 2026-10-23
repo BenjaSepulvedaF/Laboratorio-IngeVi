@@ -1,0 +1,62 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://orbe.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="Nucleo"]
+shading_mode = 0
+albedo_color = Color(0.35, 0.95, 1, 1)
+emission_enabled = true
+emission = Color(0.12, 0.8, 1, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="StandardMaterial3D" id="Aro"]
+shading_mode = 0
+albedo_color = Color(0.9, 0.75, 0.35, 1)
+emission_enabled = true
+emission = Color(0.6, 0.32, 0.08, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="SphereMesh" id="Esfera"]
+material = SubResource("Nucleo")
+radius = 0.23
+height = 0.46
+radial_segments = 24
+rings = 12
+
+[sub_resource type="TorusMesh" id="Anillo"]
+material = SubResource("Aro")
+inner_radius = 0.29
+outer_radius = 0.32
+rings = 24
+ring_segments = 8
+
+[sub_resource type="SphereMesh" id="Halo"]
+material = SubResource("Nucleo")
+radius = 0.035
+height = 0.07
+
+[node name="Orbe" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Nucleo" type="MeshInstance3D" parent="Visual"]
+mesh = SubResource("Esfera")
+
+[node name="Anillo" type="MeshInstance3D" parent="Visual"]
+rotation = Vector3(0.6, 0, 0.4)
+mesh = SubResource("Anillo")
+
+[node name="Anillo2" type="MeshInstance3D" parent="Visual"]
+rotation = Vector3(-0.8, 0, 1.2)
+mesh = SubResource("Anillo")
+scale = Vector3(1.15, 1.15, 1.15)
+
+[node name="Chispa" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.32, 0.08, 0)
+mesh = SubResource("Halo")
+
+[node name="Luz" type="OmniLight3D" parent="."]
+light_color = Color(0.2, 0.8, 1, 1)
+light_energy = 0.65
+omni_range = 3.0

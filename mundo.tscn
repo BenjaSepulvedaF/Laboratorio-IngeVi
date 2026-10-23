@@ -1,360 +1,1134 @@
 [gd_scene format=3 uid="uid://tlsh0sjpahdg"]
 
-[ext_resource type="Script" uid="uid://4ksr0xqyi1n1" path="res://jugador.gd" id="1_6ba58"]
-[ext_resource type="Script" uid="uid://b4tlbw2v8bow5" path="res://altar.gd" id="3_altar"]
-[ext_resource type="Script" uid="uid://giue1a31oij2" path="res://personaje.gd" id="4_personaje"]
-[ext_resource type="Script" path="res://interfaz.gd" id="5_interfaz"]
+[ext_resource type="Script" path="res://partida.gd" id="1_partida"]
+[ext_resource type="Script" path="res://jugador.gd" id="2_jugador"]
+[ext_resource type="Script" path="res://personaje.gd" id="3_personaje"]
+[ext_resource type="Script" path="res://interfaz.gd" id="4_interfaz"]
+[ext_resource type="Script" path="res://altar.gd" id="5_altar"]
 [ext_resource type="Script" path="res://viento.gd" id="6_viento"]
+[ext_resource type="Script" path="res://paisaje.gd" id="7_paisaje"]
+[ext_resource type="Shader" path="res://lava.gdshader" id="8_lava"]
+[ext_resource type="PackedScene" path="res://orbe.tscn" id="9_orbe"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6ba58"]
-sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
-ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+[sub_resource type="ProceduralSkyMaterial" id="CieloMaterial"]
+sky_top_color = Color(0.075, 0.065, 0.12, 1)
+sky_horizon_color = Color(0.6, 0.31, 0.22, 1)
+ground_bottom_color = Color(0.13, 0.04, 0.03, 1)
+ground_horizon_color = Color(0.6, 0.31, 0.22, 1)
 
-[sub_resource type="Sky" id="Sky_lgngo"]
-sky_material = SubResource("ProceduralSkyMaterial_6ba58")
+[sub_resource type="Sky" id="Cielo"]
+sky_material = SubResource("CieloMaterial")
 
-[sub_resource type="Environment" id="Environment_fw4w5"]
+[sub_resource type="Environment" id="Ambiente"]
 background_mode = 2
-sky = SubResource("Sky_lgngo")
+sky = SubResource("Cielo")
+ambient_light_source = 2
+ambient_light_color = Color(0.7, 0.72, 0.8, 1)
+ambient_light_energy = 0.55
+tonemap_mode = 3
 glow_enabled = true
+glow_intensity = 0.65
 fog_enabled = true
-fog_light_color = Color(0.72, 0.76, 0.84, 1)
-fog_density = 0.004
+fog_light_color = Color(0.43, 0.24, 0.23, 1)
+fog_density = 0.005
 
-[sub_resource type="WorldBoundaryShape3D" id="WorldBoundaryShape3D_jgspf"]
+[sub_resource type="StandardMaterial3D" id="Basalto"]
+albedo_color = Color(0.23, 0.22, 0.26, 1)
+roughness = 0.95
 
-[sub_resource type="Gradient" id="Gradient_pasto"]
-colors = PackedColorArray(0.12, 0.35, 0.08, 1, 0.32, 0.66, 0.2, 1)
+[sub_resource type="StandardMaterial3D" id="Superficie"]
+albedo_color = Color(0.4, 0.42, 0.45, 1)
+roughness = 0.9
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_pasto"]
-frequency = 0.15
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_pasto"]
-noise = SubResource("FastNoiseLite_pasto")
-color_ramp = SubResource("Gradient_pasto")
-seamless = true
-
-[sub_resource type="StandardMaterial3D" id="Mat_pasto"]
-albedo_texture = SubResource("NoiseTexture2D_pasto")
-uv1_scale = Vector3(200, 200, 1)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_jgspf"]
-material = SubResource("Mat_pasto")
-size = Vector2(1000, 1000)
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jgspf"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_verde"]
-albedo_color = Color(0.2, 0.8, 0.3, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_azul"]
-albedo_color = Color(0.2, 0.5, 1, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_rojo"]
-albedo_color = Color(0.9, 0.2, 0.2, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_naranja"]
-albedo_color = Color(1, 0.55, 0.1, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_morado"]
-albedo_color = Color(0.6, 0.3, 0.9, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_meta"]
-albedo_color = Color(1, 0.85, 0.2, 1)
-
-[sub_resource type="StandardMaterial3D" id="Mat_orbe"]
-albedo_color = Color(0.4, 0.9, 1, 1)
+[sub_resource type="StandardMaterial3D" id="Guia"]
+albedo_color = Color(0.95, 0.62, 0.25, 1)
 emission_enabled = true
-emission = Color(0.4, 0.9, 1, 1)
-emission_energy_multiplier = 2.0
+emission = Color(0.65, 0.23, 0.04, 1)
+emission_energy_multiplier = 0.6
 
-[sub_resource type="SphereMesh" id="SphereMesh_orbe"]
-material = SubResource("Mat_orbe")
-radius = 0.25
-height = 0.5
+[sub_resource type="StandardMaterial3D" id="AltarMaterial"]
+albedo_color = Color(0.25, 0.27, 0.33, 1)
+metallic = 0.45
+roughness = 0.55
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_altar"]
-radius = 2.5
+[sub_resource type="ShaderMaterial" id="LavaMaterial"]
+shader = ExtResource("8_lava")
 
-[sub_resource type="StandardMaterial3D" id="Mat_roca"]
-albedo_color = Color(0.42, 0.4, 0.38, 1)
+[sub_resource type="PlaneMesh" id="LavaMalla"]
+material = SubResource("LavaMaterial")
+size = Vector2(500, 500)
 
-[sub_resource type="StandardMaterial3D" id="Mat_roca_oscura"]
-albedo_color = Color(0.3, 0.32, 0.35, 1)
+[sub_resource type="BoxShape3D" id="LavaForma"]
+size = Vector3(500, 20, 500)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_viento1"]
-size = Vector3(4, 4, 6)
+[sub_resource type="CapsuleShape3D" id="Capsula"]
+radius = 0.36
+height = 2.0
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_viento2"]
-size = Vector3(6, 4, 6)
+[sub_resource type="BoxShape3D" id="IslaForma"]
+size = Vector3(9, 3, 9)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_viento3"]
-size = Vector3(8, 4, 6)
+[sub_resource type="BoxMesh" id="IslaMalla"]
+material = SubResource("Basalto")
+size = Vector3(9, 3, 9)
 
-[node name="Mundo" type="Node3D" unique_id=2943470]
+[sub_resource type="BoxMesh" id="IslaCubierta"]
+material = SubResource("Superficie")
+size = Vector3(9, 0.04, 9)
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1132857722]
-environment = SubResource("Environment_fw4w5")
+[sub_resource type="CylinderMesh" id="PedestalMalla"]
+material = SubResource("AltarMaterial")
+top_radius = 0.5
+bottom_radius = 0.65
+height = 0.8
+radial_segments = 8
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=578484382]
-transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, -0.06532788, 4.658226, -0.5873625)
+[sub_resource type="CylinderShape3D" id="PedestalForma"]
+radius = 0.65
+height = 0.8
+
+[sub_resource type="SphereShape3D" id="AltarArea"]
+radius = 2.1
+
+[sub_resource type="BoxShape3D" id="VientoForma"]
+size = Vector3(8, 5, 8)
+
+[sub_resource type="BoxShape3D" id="Forma1"]
+size = Vector3(3, 0.8, 3)
+
+[sub_resource type="BoxMesh" id="Malla1"]
+material = SubResource("Basalto")
+size = Vector3(3, 0.8, 3)
+
+[sub_resource type="BoxMesh" id="Cubierta1"]
+material = SubResource("Superficie")
+size = Vector3(3, 0.035, 3)
+
+[sub_resource type="BoxMesh" id="Marca1"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma2"]
+size = Vector3(2.8, 0.8, 2.8)
+
+[sub_resource type="BoxMesh" id="Malla2"]
+material = SubResource("Basalto")
+size = Vector3(2.8, 0.8, 2.8)
+
+[sub_resource type="BoxMesh" id="Cubierta2"]
+material = SubResource("Superficie")
+size = Vector3(2.8, 0.035, 2.8)
+
+[sub_resource type="BoxMesh" id="Marca2"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma3"]
+size = Vector3(2.6, 0.8, 2.6)
+
+[sub_resource type="BoxMesh" id="Malla3"]
+material = SubResource("Basalto")
+size = Vector3(2.6, 0.8, 2.6)
+
+[sub_resource type="BoxMesh" id="Cubierta3"]
+material = SubResource("Superficie")
+size = Vector3(2.6, 0.035, 2.6)
+
+[sub_resource type="BoxMesh" id="Marca3"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma4"]
+size = Vector3(2.8, 0.8, 2.8)
+
+[sub_resource type="BoxMesh" id="Malla4"]
+material = SubResource("Basalto")
+size = Vector3(2.8, 0.8, 2.8)
+
+[sub_resource type="BoxMesh" id="Cubierta4"]
+material = SubResource("Superficie")
+size = Vector3(2.8, 0.035, 2.8)
+
+[sub_resource type="BoxMesh" id="Marca4"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma5"]
+size = Vector3(2.6, 0.8, 2.6)
+
+[sub_resource type="BoxMesh" id="Malla5"]
+material = SubResource("Basalto")
+size = Vector3(2.6, 0.8, 2.6)
+
+[sub_resource type="BoxMesh" id="Cubierta5"]
+material = SubResource("Superficie")
+size = Vector3(2.6, 0.035, 2.6)
+
+[sub_resource type="BoxMesh" id="Marca5"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma6"]
+size = Vector3(2.8, 0.8, 2.8)
+
+[sub_resource type="BoxMesh" id="Malla6"]
+material = SubResource("Basalto")
+size = Vector3(2.8, 0.8, 2.8)
+
+[sub_resource type="BoxMesh" id="Cubierta6"]
+material = SubResource("Superficie")
+size = Vector3(2.8, 0.035, 2.8)
+
+[sub_resource type="BoxMesh" id="Marca6"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma7"]
+size = Vector3(2.6, 0.8, 2.6)
+
+[sub_resource type="BoxMesh" id="Malla7"]
+material = SubResource("Basalto")
+size = Vector3(2.6, 0.8, 2.6)
+
+[sub_resource type="BoxMesh" id="Cubierta7"]
+material = SubResource("Superficie")
+size = Vector3(2.6, 0.035, 2.6)
+
+[sub_resource type="BoxMesh" id="Marca7"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma8"]
+size = Vector3(3.4, 0.8, 3.4)
+
+[sub_resource type="BoxMesh" id="Malla8"]
+material = SubResource("Basalto")
+size = Vector3(3.4, 0.8, 3.4)
+
+[sub_resource type="BoxMesh" id="Cubierta8"]
+material = SubResource("Superficie")
+size = Vector3(3.4, 0.035, 3.4)
+
+[sub_resource type="BoxMesh" id="Marca8"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma9"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla9"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta9"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca9"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma10"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla10"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta10"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca10"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma11"]
+size = Vector3(1.2, 0.8, 4.5)
+
+[sub_resource type="BoxMesh" id="Malla11"]
+material = SubResource("Basalto")
+size = Vector3(1.2, 0.8, 4.5)
+
+[sub_resource type="BoxMesh" id="Cubierta11"]
+material = SubResource("Superficie")
+size = Vector3(1.2, 0.035, 4.5)
+
+[sub_resource type="BoxMesh" id="Marca11"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma12"]
+size = Vector3(2.4, 0.8, 2.4)
+
+[sub_resource type="BoxMesh" id="Malla12"]
+material = SubResource("Basalto")
+size = Vector3(2.4, 0.8, 2.4)
+
+[sub_resource type="BoxMesh" id="Cubierta12"]
+material = SubResource("Superficie")
+size = Vector3(2.4, 0.035, 2.4)
+
+[sub_resource type="BoxMesh" id="Marca12"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma13"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla13"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta13"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca13"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma14"]
+size = Vector3(2.3, 0.8, 2.3)
+
+[sub_resource type="BoxMesh" id="Malla14"]
+material = SubResource("Basalto")
+size = Vector3(2.3, 0.8, 2.3)
+
+[sub_resource type="BoxMesh" id="Cubierta14"]
+material = SubResource("Superficie")
+size = Vector3(2.3, 0.035, 2.3)
+
+[sub_resource type="BoxMesh" id="Marca14"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma15"]
+size = Vector3(1.2, 0.8, 4.5)
+
+[sub_resource type="BoxMesh" id="Malla15"]
+material = SubResource("Basalto")
+size = Vector3(1.2, 0.8, 4.5)
+
+[sub_resource type="BoxMesh" id="Cubierta15"]
+material = SubResource("Superficie")
+size = Vector3(1.2, 0.035, 4.5)
+
+[sub_resource type="BoxMesh" id="Marca15"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma16"]
+size = Vector3(3.2, 0.8, 3.2)
+
+[sub_resource type="BoxMesh" id="Malla16"]
+material = SubResource("Basalto")
+size = Vector3(3.2, 0.8, 3.2)
+
+[sub_resource type="BoxMesh" id="Cubierta16"]
+material = SubResource("Superficie")
+size = Vector3(3.2, 0.035, 3.2)
+
+[sub_resource type="BoxMesh" id="Marca16"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma17"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla17"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta17"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca17"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma18"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla18"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta18"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca18"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma19"]
+size = Vector3(2, 0.8, 2)
+
+[sub_resource type="BoxMesh" id="Malla19"]
+material = SubResource("Basalto")
+size = Vector3(2, 0.8, 2)
+
+[sub_resource type="BoxMesh" id="Cubierta19"]
+material = SubResource("Superficie")
+size = Vector3(2, 0.035, 2)
+
+[sub_resource type="BoxMesh" id="Marca19"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma20"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla20"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta20"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca20"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma21"]
+size = Vector3(2.1, 0.8, 2.1)
+
+[sub_resource type="BoxMesh" id="Malla21"]
+material = SubResource("Basalto")
+size = Vector3(2.1, 0.8, 2.1)
+
+[sub_resource type="BoxMesh" id="Cubierta21"]
+material = SubResource("Superficie")
+size = Vector3(2.1, 0.035, 2.1)
+
+[sub_resource type="BoxMesh" id="Marca21"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma22"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla22"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta22"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca22"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma23"]
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Malla23"]
+material = SubResource("Basalto")
+size = Vector3(2.2, 0.8, 2.2)
+
+[sub_resource type="BoxMesh" id="Cubierta23"]
+material = SubResource("Superficie")
+size = Vector3(2.2, 0.035, 2.2)
+
+[sub_resource type="BoxMesh" id="Marca23"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[sub_resource type="BoxShape3D" id="Forma24"]
+size = Vector3(4.8, 0.8, 4.8)
+
+[sub_resource type="BoxMesh" id="Malla24"]
+material = SubResource("Basalto")
+size = Vector3(4.8, 0.8, 4.8)
+
+[sub_resource type="BoxMesh" id="Cubierta24"]
+material = SubResource("Superficie")
+size = Vector3(4.8, 0.035, 4.8)
+
+[sub_resource type="BoxMesh" id="Marca24"]
+material = SubResource("Guia")
+size = Vector3(0.7, 0.015, 0.12)
+
+[node name="Mundo" type="Node3D"]
+script = ExtResource("1_partida")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Ambiente")
+
+[node name="Sol" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.85, -0.6, 0)
+light_color = Color(1, 0.8, 0.63, 1)
+light_energy = 1.2
 shadow_enabled = true
+directional_shadow_max_distance = 140.0
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1066330461]
+[node name="Paisaje" type="Node3D" parent="."]
+script = ExtResource("7_paisaje")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1625398371]
-shape = SubResource("WorldBoundaryShape3D_jgspf")
-debug_color = Color(0.69899064, 1.4273612, 0, 1)
+[node name="Lava" type="Node3D" parent="."]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D" unique_id=1143063344]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0022206306, 0.4298103, 0.3740384)
-mesh = SubResource("PlaneMesh_jgspf")
+[node name="Superficie" type="MeshInstance3D" parent="Lava"]
+mesh = SubResource("LavaMalla")
 
-[node name="Jugador" type="CharacterBody3D" parent="." unique_id=974224794]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.148101, 0)
-script = ExtResource("1_6ba58")
+[node name="ZonaLetal" type="Area3D" parent="Lava"]
+position = Vector3(0, -10, 0)
+collision_layer = 0
+collision_mask = 4
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Jugador" unique_id=1642535236]
-transform = Transform3D(0.5419697, -0.0060561737, 0.84037614, 0.003282323, 0.99998164, 0.0050895573, -0.8403916, 0, 0.5419797, 0, 0, 0)
-shape = SubResource("CapsuleShape3D_jgspf")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Lava/ZonaLetal"]
+shape = SubResource("LavaForma")
 
-[node name="CameraPivot" type="Node3D" parent="Jugador" unique_id=736643605]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+[node name="IslaInicial" type="StaticBody3D" parent="." groups=["agarrable"]]
+position = Vector3(0, 1.5, 1)
+collision_layer = 3
+collision_mask = 4
 
-[node name="SpringArm3D" type="SpringArm3D" parent="Jugador/CameraPivot" unique_id=625233336]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="IslaInicial"]
+shape = SubResource("IslaForma")
+
+[node name="Roca" type="MeshInstance3D" parent="IslaInicial"]
+mesh = SubResource("IslaMalla")
+
+[node name="Cubierta" type="MeshInstance3D" parent="IslaInicial"]
+position = Vector3(0, 1.5, 0)
+mesh = SubResource("IslaCubierta")
+
+[node name="Jugador" type="CharacterBody3D" parent="."]
+position = Vector3(0, 4.025, 1)
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("2_jugador")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Jugador"]
+shape = SubResource("Capsula")
+
+[node name="CameraPivot" type="Node3D" parent="Jugador"]
+position = Vector3(0, 0.9, 0)
+rotation = Vector3(-0.22, 0, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Jugador/CameraPivot"]
 spring_length = 4.0
+collision_mask = 3
+margin = 0.15
 
-[node name="Camera3D" type="Camera3D" parent="Jugador/CameraPivot/SpringArm3D" unique_id=2141844986]
+[node name="Camera3D" type="Camera3D" parent="Jugador/CameraPivot/SpringArm3D"]
+current = true
+fov = 75.0
+near = 0.05
+far = 500.0
 
-[node name="Visual" type="Node3D" parent="Jugador" unique_id=1223912950]
-script = ExtResource("4_personaje")
+[node name="Visual" type="Node3D" parent="Jugador"]
+script = ExtResource("3_personaje")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="." unique_id=68335455]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.65423155, 0.51472366, -3.6450357)
-use_collision = true
+[node name="Interfaz" type="CanvasLayer" parent="."]
+script = ExtResource("4_interfaz")
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="." unique_id=1053343682]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.9059267, 1.4142603, -3.6450357)
-use_collision = true
-size = Vector3(1, 1.0184326, 1)
+[node name="Parkour" type="Node3D" parent="."]
 
-[node name="Interfaz" type="CanvasLayer" parent="." unique_id=500000001]
-script = ExtResource("5_interfaz")
+[node name="Apoyo01" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(0, 2.6, -7)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3
 
-[node name="Parkour" type="Node3D" parent="." unique_id=2100800598]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo01"]
+shape = SubResource("Forma1")
 
-[node name="PlataformaA" type="CSGBox3D" parent="Parkour" unique_id=94962791]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.25, -7)
-use_collision = true
-size = Vector3(2.5, 0.5, 2.5)
-material = SubResource("Mat_verde")
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo01"]
+mesh = SubResource("Malla1")
 
-[node name="PlataformaB" type="CSGBox3D" parent="Parkour" unique_id=1535322048]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.6, -11.3)
-use_collision = true
-size = Vector3(1.5, 1.2, 1.5)
-material = SubResource("Mat_azul")
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo01"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta1")
 
-[node name="PlataformaC" type="CSGBox3D" parent="Parkour" unique_id=1637589265]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1, -15.2)
-use_collision = true
-size = Vector3(1.5, 2, 1.5)
-material = SubResource("Mat_rojo")
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo01"]
+position = Vector3(0, 0.43, -1.25)
+mesh = SubResource("Marca1")
 
-[node name="PlataformaD" type="CSGBox3D" parent="Parkour" unique_id=1669422760]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 2.3, -19.1)
-use_collision = true
-size = Vector3(1.5, 0.6, 1.5)
-material = SubResource("Mat_naranja")
+[node name="Sector" type="Label3D" parent="Parkour/Apoyo01"]
+position = Vector3(0, 2.6, 0)
+billboard = 1
+text = "I · LAS BRASAS"
+font_size = 32
+modulate = Color(1, 0.75, 0.45, 1)
+no_depth_test = false
 
-[node name="Viga" type="CSGBox3D" parent="Parkour" unique_id=641340562]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.9, -23.85)
-use_collision = true
-size = Vector3(0.6, 0.6, 4)
-material = SubResource("Mat_morado")
+[node name="Apoyo02" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(0, 2.8000000000000003, -11)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3.2
 
-[node name="Meta" type="CSGBox3D" parent="Parkour" unique_id=986955397]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2.6, -29.65)
-use_collision = true
-size = Vector3(3, 0.6, 3)
-material = SubResource("StandardMaterial3D_meta")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo02"]
+shape = SubResource("Forma2")
 
-[node name="PlataformaE" type="CSGBox3D" parent="Parkour" unique_id=1232795903]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 3.1, -34.1)
-use_collision = true
-size = Vector3(1.5, 0.6, 1.5)
-material = SubResource("Mat_verde")
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo02"]
+mesh = SubResource("Malla2")
 
-[node name="PlataformaF" type="CSGBox3D" parent="Parkour" unique_id=794612083]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 2.3, -38)
-use_collision = true
-size = Vector3(1.5, 0.6, 1.5)
-material = SubResource("Mat_azul")
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo02"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta2")
 
-[node name="PlataformaG" type="CSGBox3D" parent="Parkour" unique_id=430899887]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 3.1, -41.8)
-use_collision = true
-size = Vector3(1.5, 0.6, 1.5)
-material = SubResource("Mat_naranja")
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo02"]
+position = Vector3(0, 0.43, -1.15)
+mesh = SubResource("Marca2")
 
-[node name="PlataformaFinal" type="CSGBox3D" parent="Parkour" unique_id=636831185]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 4.2, -104)
-use_collision = true
-size = Vector3(3, 0.6, 3)
-material = SubResource("StandardMaterial3D_meta")
+[node name="Apoyo03" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(1, 3.0, -15)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3.4
 
-[node name="AltarRecoger" type="Node3D" parent="Parkour" unique_id=1090917147]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 4.5, -104)
-script = ExtResource("3_altar")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo03"]
+shape = SubResource("Forma3")
 
-[node name="Pedestal" type="CSGBox3D" parent="Parkour/AltarRecoger" unique_id=1986911539]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
-use_collision = true
-size = Vector3(0.8, 0.8, 0.8)
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo03"]
+mesh = SubResource("Malla3")
 
-[node name="Orbe" type="MeshInstance3D" parent="Parkour/AltarRecoger" unique_id=562794202]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-mesh = SubResource("SphereMesh_orbe")
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo03"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta3")
 
-[node name="Area3D" type="Area3D" parent="Parkour/AltarRecoger" unique_id=1318393978]
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo03"]
+position = Vector3(0, 0.43, -1.05)
+mesh = SubResource("Marca3")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/AltarRecoger/Area3D" unique_id=1069189669]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("SphereShape3D_altar")
+[node name="Apoyo04" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-0.8, 2.7, -19)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3.1
 
-[node name="Etiqueta" type="Label3D" parent="Parkour/AltarRecoger" unique_id=892583789]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo04"]
+shape = SubResource("Forma4")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo04"]
+mesh = SubResource("Malla4")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo04"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta4")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo04"]
+position = Vector3(0, 0.43, -1.15)
+mesh = SubResource("Marca4")
+
+[node name="Apoyo05" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-2, 2.9, -23)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3.3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo05"]
+shape = SubResource("Forma5")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo05"]
+mesh = SubResource("Malla5")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo05"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta5")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo05"]
+position = Vector3(0, 0.43, -1.05)
+mesh = SubResource("Marca5")
+
+[node name="Apoyo06" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-2, 3.1, -27)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo06"]
+shape = SubResource("Forma6")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo06"]
+mesh = SubResource("Malla6")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo06"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta6")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo06"]
+position = Vector3(0, 0.43, -1.15)
+mesh = SubResource("Marca6")
+
+[node name="Apoyo07" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(0, 3.3000000000000003, -31)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3.7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo07"]
+shape = SubResource("Forma7")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo07"]
+mesh = SubResource("Malla7")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo07"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta7")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo07"]
+position = Vector3(0, 0.43, -1.05)
+mesh = SubResource("Marca7")
+
+[node name="Apoyo08" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(1.5, 3.1, -35)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 1
+metadata/altura_superficie = 3.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo08"]
+shape = SubResource("Forma8")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo08"]
+mesh = SubResource("Malla8")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo08"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta8")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo08"]
+position = Vector3(0, 0.43, -1.45)
+mesh = SubResource("Marca8")
+
+[node name="Apoyo09" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(4, 3.3000000000000003, -39)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 3.7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo09"]
+shape = SubResource("Forma9")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo09"]
+mesh = SubResource("Malla9")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo09"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta9")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo09"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca9")
+
+[node name="Sector" type="Label3D" parent="Parkour/Apoyo09"]
+position = Vector3(0, 2.6, 0)
+billboard = 1
+text = "II · LA CORNISA"
+font_size = 32
+modulate = Color(1, 0.75, 0.45, 1)
+no_depth_test = false
+
+[node name="Apoyo10" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(5, 3.5, -43)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 3.9
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo10"]
+shape = SubResource("Forma10")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo10"]
+mesh = SubResource("Malla10")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo10"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta10")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo10"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca10")
+
+[node name="Apoyo11" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(5, 3.5, -47.5)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 3.9
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo11"]
+shape = SubResource("Forma11")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo11"]
+mesh = SubResource("Malla11")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo11"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta11")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo11"]
+position = Vector3(0, 0.43, -2.0)
+mesh = SubResource("Marca11")
+
+[node name="Apoyo12" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(2, 3.6999999999999997, -52)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 4.1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo12"]
+shape = SubResource("Forma12")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo12"]
+mesh = SubResource("Malla12")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo12"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta12")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo12"]
+position = Vector3(0, 0.43, -0.95)
+mesh = SubResource("Marca12")
+
+[node name="Apoyo13" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-1, 3.5, -55.7)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 3.9
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo13"]
+shape = SubResource("Forma13")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo13"]
+mesh = SubResource("Malla13")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo13"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta13")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo13"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca13")
+
+[node name="Apoyo14" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-4, 3.8000000000000003, -59)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 4.2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo14"]
+shape = SubResource("Forma14")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo14"]
+mesh = SubResource("Malla14")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo14"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta14")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo14"]
+position = Vector3(0, 0.43, -0.8999999999999999)
+mesh = SubResource("Marca14")
+
+[node name="Apoyo15" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-4, 3.8000000000000003, -63.5)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 4.2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo15"]
+shape = SubResource("Forma15")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo15"]
+mesh = SubResource("Malla15")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo15"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta15")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo15"]
+position = Vector3(0, 0.43, -2.0)
+mesh = SubResource("Marca15")
+
+[node name="Apoyo16" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-2, 3.6, -68)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 2
+metadata/altura_superficie = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo16"]
+shape = SubResource("Forma16")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo16"]
+mesh = SubResource("Malla16")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo16"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta16")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo16"]
+position = Vector3(0, 0.43, -1.35)
+mesh = SubResource("Marca16")
+
+[node name="Apoyo17" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(1, 3.8000000000000003, -72)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo17"]
+shape = SubResource("Forma17")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo17"]
+mesh = SubResource("Malla17")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo17"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta17")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo17"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca17")
+
+[node name="Sector" type="Label3D" parent="Parkour/Apoyo17"]
+position = Vector3(0, 2.6, 0)
+billboard = 1
+text = "III · EL ALIENTO DEL VOLCÁN"
+font_size = 32
+modulate = Color(1, 0.75, 0.45, 1)
+no_depth_test = false
+
+[node name="Apoyo18" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(3, 4.0, -76)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo18"]
+shape = SubResource("Forma18")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo18"]
+mesh = SubResource("Malla18")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo18"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta18")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo18"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca18")
+
+[node name="Apoyo19" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(1, 3.8000000000000003, -80)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo19"]
+shape = SubResource("Forma19")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo19"]
+mesh = SubResource("Malla19")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo19"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta19")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo19"]
+position = Vector3(0, 0.43, -0.75)
+mesh = SubResource("Marca19")
+
+[node name="Apoyo20" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-2, 4.1, -83.5)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo20"]
+shape = SubResource("Forma20")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo20"]
+mesh = SubResource("Malla20")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo20"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta20")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo20"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca20")
+
+[node name="Apoyo21" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-3.5, 3.9, -87.5)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo21"]
+shape = SubResource("Forma21")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo21"]
+mesh = SubResource("Malla21")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo21"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta21")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo21"]
+position = Vector3(0, 0.43, -0.8)
+mesh = SubResource("Marca21")
+
+[node name="Apoyo22" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(-1, 4.1, -91.3)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo22"]
+shape = SubResource("Forma22")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo22"]
+mesh = SubResource("Malla22")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo22"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta22")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo22"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca22")
+
+[node name="Apoyo23" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(1, 4.3, -95.2)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo23"]
+shape = SubResource("Forma23")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo23"]
+mesh = SubResource("Malla23")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo23"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta23")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo23"]
+position = Vector3(0, 0.43, -0.8500000000000001)
+mesh = SubResource("Marca23")
+
+[node name="Apoyo24" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+position = Vector3(2.5, 4.3, -100)
+collision_layer = 3
+collision_mask = 4
+metadata/sector = 3
+metadata/altura_superficie = 4.7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/Apoyo24"]
+shape = SubResource("Forma24")
+
+[node name="Roca" type="MeshInstance3D" parent="Parkour/Apoyo24"]
+mesh = SubResource("Malla24")
+
+[node name="Cubierta" type="MeshInstance3D" parent="Parkour/Apoyo24"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("Cubierta24")
+
+[node name="Marca" type="MeshInstance3D" parent="Parkour/Apoyo24"]
+position = Vector3(0, 0.43, -2.15)
+mesh = SubResource("Marca24")
+
+[node name="AltarRecoger" type="Node3D" parent="."]
+position = Vector3(2.5, 4.7, -100)
+script = ExtResource("5_altar")
+modo = 0
+
+[node name="Pedestal" type="StaticBody3D" parent="AltarRecoger"]
+position = Vector3(0, 0.4, 0)
+collision_layer = 1
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AltarRecoger/Pedestal"]
+shape = SubResource("PedestalForma")
+
+[node name="Malla" type="MeshInstance3D" parent="AltarRecoger/Pedestal"]
+mesh = SubResource("PedestalMalla")
+
+[node name="Orbe" parent="AltarRecoger" instance=ExtResource("9_orbe")]
+position = Vector3(0, 1.2, 0)
+
+[node name="Area3D" type="Area3D" parent="AltarRecoger"]
+position = Vector3(0, 1, 0)
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AltarRecoger/Area3D"]
+shape = SubResource("AltarArea")
+
+[node name="Etiqueta" type="Label3D" parent="AltarRecoger"]
+position = Vector3(0, 2.2, 0)
 billboard = 1
 text = "Altar"
-font_size = 48
+font_size = 32
+modulate = Color(0.65, 0.94, 1, 1)
 
-[node name="AltarColocar" type="Node3D" parent="." unique_id=1209294869]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 1.5)
-script = ExtResource("3_altar")
+[node name="AltarColocar" type="Node3D" parent="."]
+position = Vector3(-2.5, 3, 2.5)
+script = ExtResource("5_altar")
 modo = 1
 
-[node name="Pedestal" type="CSGBox3D" parent="AltarColocar" unique_id=510887937]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
-use_collision = true
-size = Vector3(0.8, 0.8, 0.8)
+[node name="Pedestal" type="StaticBody3D" parent="AltarColocar"]
+position = Vector3(0, 0.4, 0)
+collision_layer = 1
+collision_mask = 4
 
-[node name="Orbe" type="MeshInstance3D" parent="AltarColocar" unique_id=1319172787]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-visible = false
-mesh = SubResource("SphereMesh_orbe")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AltarColocar/Pedestal"]
+shape = SubResource("PedestalForma")
 
-[node name="Area3D" type="Area3D" parent="AltarColocar" unique_id=1582857962]
+[node name="Malla" type="MeshInstance3D" parent="AltarColocar/Pedestal"]
+mesh = SubResource("PedestalMalla")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="AltarColocar/Area3D" unique_id=1710617081]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5497208e-05, 1, -8.666515e-05)
-shape = SubResource("SphereShape3D_altar")
+[node name="Orbe" parent="AltarColocar" instance=ExtResource("9_orbe")]
+position = Vector3(0, 1.2, 0)
 
-[node name="Etiqueta" type="Label3D" parent="AltarColocar" unique_id=1503577072]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+[node name="Area3D" type="Area3D" parent="AltarColocar"]
+position = Vector3(0, 1, 0)
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AltarColocar/Area3D"]
+shape = SubResource("AltarArea")
+
+[node name="Etiqueta" type="Label3D" parent="AltarColocar"]
+position = Vector3(0, 2.2, 0)
 billboard = 1
 text = "Altar"
-font_size = 48
-
-[node name="ExtensionParkour" type="Node3D" parent="Parkour"]
-
-[node name="PlataformaExt1" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.6, -45)
-use_collision = true
-size = Vector3(1.4, 0.6, 1.4)
-material = SubResource("Mat_naranja")
-
-[node name="PlataformaExt2" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2.4, -48.2)
-use_collision = true
-size = Vector3(1.2, 0.6, 1.2)
-material = SubResource("Mat_azul")
-
-[node name="PlataformaExt3" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 3, -51.5)
-use_collision = true
-size = Vector3(1.6, 0.6, 1.6)
-material = SubResource("Mat_rojo")
-
-[node name="PlataformaExt4" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 3.8, -54.6)
-use_collision = true
-size = Vector3(1.4, 0.6, 1.4)
-material = SubResource("Mat_verde")
-
-[node name="PlataformaExt5" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3.4, -58.4)
-use_collision = true
-size = Vector3(1.2, 0.6, 1.2)
-material = SubResource("Mat_morado")
-
-[node name="PlataformaExt6" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2.8, -61.5)
-use_collision = true
-size = Vector3(1.5, 0.6, 1.5)
-material = SubResource("Mat_azul")
-
-[node name="PlataformaExt7" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3.5, -65)
-use_collision = true
-size = Vector3(1.4, 0.6, 1.4)
-material = SubResource("Mat_naranja")
-
-[node name="PlataformaExt8" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 2.9, -68.4)
-use_collision = true
-size = Vector3(2.2, 0.6, 2.2)
-material = SubResource("Mat_verde")
-
-[node name="PlataformaExt9" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.8, -72)
-use_collision = true
-size = Vector3(1, 0.6, 1)
-material = SubResource("Mat_rojo")
-
-[node name="PlataformaExt10" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 3, -75.6)
-use_collision = true
-size = Vector3(1.4, 0.6, 1.4)
-material = SubResource("Mat_azul")
-
-[node name="PlataformaExt11" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 3.2, -79.2)
-use_collision = true
-size = Vector3(1.3, 0.6, 1.3)
-material = SubResource("Mat_naranja")
-
-[node name="VigaExt" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 3.2, -83.4)
-use_collision = true
-size = Vector3(0.6, 0.6, 4)
-material = SubResource("Mat_morado")
-
-[node name="PlataformaExt13" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 4, -87.8)
-use_collision = true
-size = Vector3(1.6, 0.6, 1.6)
-material = SubResource("Mat_verde")
-
-[node name="PlataformaExt14" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 4.5, -91.8)
-use_collision = true
-size = Vector3(1.5, 0.6, 1.5)
-material = SubResource("Mat_rojo")
-
-[node name="PlataformaExt15" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4.6, -95.4)
-use_collision = true
-size = Vector3(1.4, 0.6, 1.4)
-material = SubResource("Mat_azul")
-
-[node name="PlataformaExt16" type="CSGBox3D" parent="Parkour/ExtensionParkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 4.2, -99.2)
-use_collision = true
-size = Vector3(2.4, 0.6, 2.4)
-material = SubResource("Mat_naranja")
+font_size = 32
+modulate = Color(0.65, 0.94, 1, 1)
 
 [node name="ZonaViento1" type="Area3D" parent="Parkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 4, -53)
+position = Vector3(2, 5.5, -75)
+collision_layer = 0
+collision_mask = 4
 script = ExtResource("6_viento")
 direccion = Vector3(1, 0, 0)
 aceleracion = 10.0
@@ -362,10 +1136,19 @@ duracion_rafaga = 0.5
 intervalo = 2.2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/ZonaViento1"]
-shape = SubResource("BoxShape3D_viento1")
+shape = SubResource("VientoForma")
+
+[node name="Aviso" type="Label3D" parent="Parkour/ZonaViento1"]
+position = Vector3(0, 1.8, 0)
+billboard = 1
+text = "≈ Ráfagas de viento ≈"
+font_size = 24
+modulate = Color(0.85, 0.8, 0.7, 1)
 
 [node name="ZonaViento2" type="Area3D" parent="Parkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 4, -63)
+position = Vector3(-2, 5.5, -84)
+collision_layer = 0
+collision_mask = 4
 script = ExtResource("6_viento")
 direccion = Vector3(0, 0, 1)
 aceleracion = 10.0
@@ -373,10 +1156,19 @@ duracion_rafaga = 0.5
 intervalo = 2.2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/ZonaViento2"]
-shape = SubResource("BoxShape3D_viento2")
+shape = SubResource("VientoForma")
+
+[node name="Aviso" type="Label3D" parent="Parkour/ZonaViento2"]
+position = Vector3(0, 1.8, 0)
+billboard = 1
+text = "≈ Ráfagas de viento ≈"
+font_size = 24
+modulate = Color(0.85, 0.8, 0.7, 1)
 
 [node name="ZonaViento3" type="Area3D" parent="Parkour"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, -94)
+position = Vector3(0, 5.5, -94)
+collision_layer = 0
+collision_mask = 4
 script = ExtResource("6_viento")
 direccion = Vector3(-1, 0, 0)
 aceleracion = 10.0
@@ -384,48 +1176,11 @@ duracion_rafaga = 0.5
 intervalo = 2.2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Parkour/ZonaViento3"]
-shape = SubResource("BoxShape3D_viento3")
+shape = SubResource("VientoForma")
 
-[node name="Montanas" type="Node3D" parent="."]
-
-[node name="Montana1" type="CSGCylinder3D" parent="Montanas"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -75, 35, -60)
-radius = 50.0
-height = 100.0
-cone = true
-material = SubResource("Mat_roca")
-
-[node name="Montana2" type="CSGCylinder3D" parent="Montanas"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 30, -70)
-radius = 45.0
-height = 90.0
-cone = true
-material = SubResource("Mat_roca_oscura")
-
-[node name="Montana3" type="CSGCylinder3D" parent="Montanas"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 40, -175)
-radius = 60.0
-height = 110.0
-cone = true
-material = SubResource("Mat_roca_oscura")
-
-[node name="Montana4" type="CSGCylinder3D" parent="Montanas"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 35, -180)
-radius = 55.0
-height = 100.0
-cone = true
-material = SubResource("Mat_roca")
-
-[node name="Montana5" type="CSGCylinder3D" parent="Montanas"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 30, -110)
-radius = 50.0
-height = 90.0
-cone = true
-material = SubResource("Mat_roca")
-
-[node name="Montana6" type="CSGCylinder3D" parent="Montanas"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 110, 40, -40)
-radius = 60.0
-height = 110.0
-cone = true
-material = SubResource("Mat_roca_oscura")
+[node name="Aviso" type="Label3D" parent="Parkour/ZonaViento3"]
+position = Vector3(0, 1.8, 0)
+billboard = 1
+text = "≈ Ráfagas de viento ≈"
+font_size = 24
+modulate = Color(0.85, 0.8, 0.7, 1)
