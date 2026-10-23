@@ -51,6 +51,10 @@ func _ready() -> void:
 	_apply_camera_mode()
 
 
+# delta es el tiempo (en segundos) desde el último tick de física. La física corre
+# a tasa fija (60 por defecto), así que delta es casi constante. Todas las velocidades
+# y aceleraciones están en unidades por segundo y se multiplican por delta, por lo que
+# el movimiento no depende del framerate.
 func _physics_process(delta: float) -> void:
 	bloqueo_agarre = maxf(0.0, bloqueo_agarre - delta)
 	match estado:
@@ -75,6 +79,7 @@ func _mover_normal(delta: float) -> void:
 		coyote_timer = COYOTE_TIME
 		ultima_posicion_suelo = global_position
 	else:
+		# Los temporizadores restan segundos reales: su duración no depende de los FPS.
 		coyote_timer -= delta
 	if Input.is_action_just_pressed("ui_accept"):
 		jump_buffer_timer = JUMP_BUFFER_TIME
@@ -84,6 +89,7 @@ func _mover_normal(delta: float) -> void:
 		var gravedad := get_gravity()
 		if velocity.y < 0:
 			gravedad *= FALL_GRAVITY_MULT
+		# La gravedad está en m/s². Multiplicarla por delta suma la velocidad de este tick.
 		velocity += gravedad * delta
 	if jump_buffer_timer > 0 and coyote_timer > 0:
 		velocity.y = JUMP_VELOCITY
@@ -93,15 +99,19 @@ func _mover_normal(delta: float) -> void:
 		velocity.y *= JUMP_CUT
 	var entrada := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var direccion := global_basis * Vector3(entrada.x, 0, entrada.y)
+	# La aceleración está en m/s². Con delta, cada tick cambia la velocidad solo lo que
+	# corresponde a ese tiempo: a 30 o 144 FPS se llega a la misma velocidad en el mismo tiempo.
 	var aceleracion := ACCEL_GROUND if is_on_floor() else ACCEL_AIR
 	velocity.x = move_toward(velocity.x, direccion.x * SPEED, aceleracion * delta)
 	velocity.z = move_toward(velocity.z, direccion.z * SPEED, aceleracion * delta)
+	# Las ráfagas también son aceleraciones (m/s²), así que se integran con delta.
 	if viento_restante > 0:
 		velocidad_viento += viento * delta
 		viento_restante -= delta
 	else:
 		velocidad_viento = velocidad_viento.move_toward(Vector3.ZERO, 6.0 * delta)
 	velocity += velocidad_viento
+	# move_and_slide() usa velocity en m/s y ya aplica el desplazamiento de este tick.
 	move_and_slide()
 	if not is_on_floor() and velocity.y <= 0.0 and bloqueo_agarre <= 0.0:
 		_buscar_borde()
@@ -189,6 +199,7 @@ func _iniciar_escalada() -> void:
 
 
 func _escalar(delta: float) -> void:
+	# delta / DURACION_ESCALADA es la fracción de la escalada que cubre este tick.
 	progreso_escalada = minf(1.0, progreso_escalada + delta / DURACION_ESCALADA)
 	var objetivo: Vector3
 	if progreso_escalada < 0.55:
@@ -256,10 +267,12 @@ func posicion_orbe() -> Vector3:
 	return visual.orbe_espalda.global_position
 
 
-func aplicar_viento(aceleracion: Vector3, duracion: float) -> void:
-	if estado == Estado.NORMAL:
-		viento = aceleracion
-		viento_restante = duracion
+func aplicar_viento(aceleracion: Vector3, duracion: float) -> bool:
+	if estado != Estado.NORMAL:
+		return false
+	viento = aceleracion
+	viento_restante = duracion
+	return true
 
 
 func play_grab() -> void:
