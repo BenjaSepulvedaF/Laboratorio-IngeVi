@@ -19,6 +19,8 @@ const BLOQUEO_REAGARRE := 0.4
 const RADIO_CUERPO := 0.36
 const ALTURA_MEDIA := 1.0
 const MASCARA_BORDES := 2
+# Caídas más lentas que esto (bajar un escalón) no suenan al aterrizar.
+const VELOCIDAD_ATERRIZAJE_AUDIBLE := 2.5
 
 var estado: Estado = Estado.NORMAL
 var coyote_timer := 0.0
@@ -36,12 +38,20 @@ var punto_colgado := Vector3.ZERO
 var punto_elevado := Vector3.ZERO
 var punto_destino := Vector3.ZERO
 var ultima_posicion_suelo := Vector3.ZERO
+var velocidad_caida := 0.0
 var tween_agarre: Tween
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var visual = $Visual
 @onready var colision: CollisionShape3D = $CollisionShape3D
+@onready var sonido_salto: AudioStreamPlayer = $Sonidos/Salto
+@onready var sonido_aterrizaje: AudioStreamPlayer = $Sonidos/Aterrizaje
+@onready var sonido_agarre: AudioStreamPlayer = $Sonidos/Agarre
+@onready var sonido_escalada: AudioStreamPlayer = $Sonidos/Escalada
+@onready var sonido_orbe: AudioStreamPlayer = $Sonidos/Orbe
+# Su process_mode es Always: al morir se pausa el juego y un sonido normal quedaría congelado.
+@onready var sonido_muerte: AudioStreamPlayer = $Sonidos/Muerte
 
 
 func _ready() -> void:
@@ -95,6 +105,9 @@ func _mover_normal(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
+		# Feedback del salto: sonido y estirón del cuerpo en el mismo tick del impulso.
+		_reproducir(sonido_salto)
+		visual.scale = Vector3(0.9, 1.15, 0.9)
 	if Input.is_action_just_released("ui_accept") and velocity.y > 0:
 		velocity.y *= JUMP_CUT
 	var entrada := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
@@ -111,6 +124,8 @@ func _mover_normal(delta: float) -> void:
 	else:
 		velocidad_viento = velocidad_viento.move_toward(Vector3.ZERO, 6.0 * delta)
 	velocity += velocidad_viento
+	# Se guarda antes de moverse: al tocar el suelo, move_and_slide() anula velocity.y.
+	velocidad_caida = -velocity.y
 	# move_and_slide() usa velocity en m/s y ya aplica el desplazamiento de este tick.
 	move_and_slide()
 	if not is_on_floor() and velocity.y <= 0.0 and bloqueo_agarre <= 0.0:
@@ -165,6 +180,7 @@ func _buscar_borde() -> void:
 		estado = Estado.COLGADO
 		was_on_floor = false
 		agarre_cambiado.emit(true)
+		_reproducir(sonido_agarre)
 		return
 
 
@@ -196,6 +212,7 @@ func _iniciar_escalada() -> void:
 	estado = Estado.ESCALANDO
 	progreso_escalada = 0.0
 	agarre_cambiado.emit(false)
+	_reproducir(sonido_escalada)
 
 
 func _escalar(delta: float) -> void:
@@ -237,6 +254,7 @@ func _limpiar_impulsos() -> void:
 	viento_restante = 0.0
 	coyote_timer = 0.0
 	jump_buffer_timer = 0.0
+	velocidad_caida = 0.0
 
 
 func bloquear() -> void:
@@ -281,6 +299,20 @@ func play_grab() -> void:
 	tween_agarre = create_tween()
 	tween_agarre.tween_property(self, "grab_amount", 1.0, 0.2)
 	tween_agarre.tween_property(self, "grab_amount", 0.0, 0.5)
+	# play_grab() se llama al recoger y al entregar el orbe.
+	_reproducir(sonido_orbe)
+
+
+# La llama partida.gd al morir, sea por tocar la lava o por caer fuera del mapa.
+func reproducir_muerte() -> void:
+	_reproducir(sonido_muerte)
+
+
+# Variar levemente el tono evita que un sonido repetido muchas veces suene
+# idéntico y canse al oído.
+func _reproducir(sonido: AudioStreamPlayer) -> void:
+	sonido.pitch_scale = randf_range(0.92, 1.08)
+	sonido.play()
 
 
 func _update_animation(delta: float) -> void:
@@ -289,7 +321,10 @@ func _update_animation(delta: float) -> void:
 	var pose_borde := 1 if estado == Estado.COLGADO else (2 if estado == Estado.ESCALANDO else 0)
 	visual.animar(velocidad_horizontal, apoyado or estado == Estado.BLOQUEADO, grab_amount, delta, pose_borde, progreso_escalada)
 	if estado == Estado.NORMAL and apoyado and not was_on_floor:
+		# Feedback del aterrizaje: aplastamiento del cuerpo y sonido en el mismo tick.
 		visual.scale = Vector3(1.1, 0.85, 1.1)
+		if velocidad_caida > VELOCIDAD_ATERRIZAJE_AUDIBLE:
+			_reproducir(sonido_aterrizaje)
 	visual.scale = visual.scale.lerp(Vector3.ONE, minf(1.0, 8.0 * delta))
 	was_on_floor = apoyado
 

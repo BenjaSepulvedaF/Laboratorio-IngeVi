@@ -76,6 +76,7 @@ func _morir() -> void:
 	if tween_entrega:
 		tween_entrega.kill()
 	jugador.bloquear()
+	jugador.reproducir_muerte()
 	_establecer_orbe("origen")
 	_menu(Estado.DERROTA)
 

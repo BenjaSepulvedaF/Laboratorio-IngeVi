@@ -1,8 +1,7 @@
 [gd_scene format=3]
 
+[ext_resource type="PackedScene" path="res://jugador/jugador.tscn" id="jugador_escena"]
 [ext_resource type="Script" path="res://niveles/spawn/spawn.gd" id="1_spawn"]
-[ext_resource type="Script" path="res://jugador/jugador.gd" id="2_jugador"]
-[ext_resource type="Script" path="res://jugador/personaje.gd" id="3_personaje"]
 [ext_resource type="PackedScene" path="res://objetos/puerta/puerta.tscn" id="4_puerta"]
 [ext_resource type="Texture2D" path="res://assets/texturas/cesped/Grass001_1K-JPG_Color.jpg" id="5_cesped_color"]
 [ext_resource type="Texture2D" path="res://assets/texturas/cesped/Grass001_1K-JPG_NormalGL.jpg" id="6_cesped_normal"]
@@ -95,8 +94,6 @@ albedo_color = Color(1, 0.35, 0.1, 1)
 emission_enabled = true
 emission = Color(1, 0.3, 0.05, 1)
 emission_energy_multiplier = 2.5
-
-[sub_resource type="CapsuleShape3D" id="Capsula_spawn"]
 
 [sub_resource type="ParticleProcessMaterial" id="Brasas_proceso"]
 emission_shape = 3
@@ -246,32 +243,8 @@ light_color = Color(1, 0.6, 0.3, 1)
 omni_range = 8.0
 light_energy = 1.2
 
-[node name="Jugador" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 6)
-collision_layer = 4
-collision_mask = 3
-script = ExtResource("2_jugador")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Jugador"]
-shape = SubResource("Capsula_spawn")
-
-[node name="CameraPivot" type="Node3D" parent="Jugador"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-rotation = Vector3(-0.22, 0, 0)
-
-[node name="SpringArm3D" type="SpringArm3D" parent="Jugador/CameraPivot"]
-spring_length = 4.0
-collision_mask = 3
-margin = 0.15
-
-[node name="Camera3D" type="Camera3D" parent="Jugador/CameraPivot/SpringArm3D"]
-current = true
-fov = 75.0
-near = 0.05
-far = 500.0
-
-[node name="Visual" type="Node3D" parent="Jugador"]
-script = ExtResource("3_personaje")
+[node name="Jugador" parent="." instance=ExtResource("jugador_escena")]
+position = Vector3(0, 1.5, 6)
 
 [node name="Puerta" parent="." instance=ExtResource("4_puerta")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9)

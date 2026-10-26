@@ -1,8 +1,7 @@
 [gd_scene format=3 uid="uid://tlsh0sjpahdg"]
 
+[ext_resource type="PackedScene" path="res://jugador/jugador.tscn" id="jugador_escena"]
 [ext_resource type="Script" path="res://niveles/mundo/partida.gd" id="1_partida"]
-[ext_resource type="Script" path="res://jugador/jugador.gd" id="2_jugador"]
-[ext_resource type="Script" path="res://jugador/personaje.gd" id="3_personaje"]
 [ext_resource type="Script" path="res://ui/interfaz.gd" id="4_interfaz"]
 [ext_resource type="Script" path="res://objetos/altar/altar.gd" id="5_altar"]
 [ext_resource type="Script" path="res://objetos/viento/viento.gd" id="6_viento"]
@@ -114,10 +113,6 @@ size = Vector2(500, 500)
 
 [sub_resource type="BoxShape3D" id="LavaForma"]
 size = Vector3(500, 20, 500)
-
-[sub_resource type="CapsuleShape3D" id="Capsula"]
-radius = 0.36
-height = 2.0
 
 [sub_resource type="BoxShape3D" id="IslaForma"]
 size = Vector3(9, 3, 9)
@@ -551,32 +546,8 @@ mesh = SubResource("IslaMalla")
 position = Vector3(0, 1.5, 0)
 mesh = SubResource("IslaCubierta")
 
-[node name="Jugador" type="CharacterBody3D" parent="."]
+[node name="Jugador" parent="." instance=ExtResource("jugador_escena")]
 position = Vector3(0, 4.025, 1)
-collision_layer = 4
-collision_mask = 3
-script = ExtResource("2_jugador")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Jugador"]
-shape = SubResource("Capsula")
-
-[node name="CameraPivot" type="Node3D" parent="Jugador"]
-position = Vector3(0, 0.9, 0)
-rotation = Vector3(-0.22, 0, 0)
-
-[node name="SpringArm3D" type="SpringArm3D" parent="Jugador/CameraPivot"]
-spring_length = 4.0
-collision_mask = 3
-margin = 0.15
-
-[node name="Camera3D" type="Camera3D" parent="Jugador/CameraPivot/SpringArm3D"]
-current = true
-fov = 75.0
-near = 0.05
-far = 500.0
-
-[node name="Visual" type="Node3D" parent="Jugador"]
-script = ExtResource("3_personaje")
 
 [node name="Interfaz" type="CanvasLayer" parent="."]
 script = ExtResource("4_interfaz")

@@ -1,0 +1,73 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://jugador/jugador.gd" id="1_jugador"]
+[ext_resource type="Script" path="res://jugador/personaje.gd" id="2_personaje"]
+[ext_resource type="AudioStream" path="res://assets/audio/salto.wav" id="3_salto"]
+[ext_resource type="AudioStream" path="res://assets/audio/aterrizaje.wav" id="4_aterrizaje"]
+[ext_resource type="AudioStream" path="res://assets/audio/agarre.mp3" id="5_agarre"]
+[ext_resource type="AudioStream" path="res://assets/audio/escalada.mp3" id="6_escalada"]
+[ext_resource type="AudioStream" path="res://assets/audio/orbe.wav" id="7_orbe"]
+[ext_resource type="AudioStream" path="res://assets/audio/death.mp3" id="8_muerte"]
+
+[sub_resource type="CapsuleShape3D" id="Capsula"]
+radius = 0.36
+height = 2.0
+
+[node name="Jugador" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_jugador")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("Capsula")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+position = Vector3(0, 0.9, 0)
+rotation = Vector3(-0.22, 0, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 4.0
+collision_mask = 3
+margin = 0.15
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true
+fov = 75.0
+near = 0.05
+far = 500.0
+
+[node name="Visual" type="Node3D" parent="."]
+script = ExtResource("2_personaje")
+
+[node name="Sonidos" type="Node" parent="."]
+
+[node name="Salto" type="AudioStreamPlayer" parent="Sonidos"]
+stream = ExtResource("3_salto")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="Aterrizaje" type="AudioStreamPlayer" parent="Sonidos"]
+stream = ExtResource("4_aterrizaje")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="Agarre" type="AudioStreamPlayer" parent="Sonidos"]
+stream = ExtResource("5_agarre")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="Escalada" type="AudioStreamPlayer" parent="Sonidos"]
+stream = ExtResource("6_escalada")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="Orbe" type="AudioStreamPlayer" parent="Sonidos"]
+stream = ExtResource("7_orbe")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="Muerte" type="AudioStreamPlayer" parent="Sonidos"]
+process_mode = 3
+stream = ExtResource("8_muerte")
+volume_db = -3.0
+bus = &"SFX"
