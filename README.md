@@ -4,7 +4,7 @@
 **Entrega:** LAB 2 – Prototipo de Escena Base  
 **Nombre del equipo:** CTM Lovers 
 
-**Integrantes:** Benjamín Sepúlveda, Bastian Brito  
+**Integrantes:** Benjamín Sepúlveda, Bastian Brito, Mohamed Al-Marzuk 
 **Nombre del proyecto:** El Juego CTM  
 **Motor utilizado:** Godot Engine v4.7.2-stable (Renderer Forward+, Jolt Physics 3D)  
 
@@ -15,7 +15,7 @@
 1. Descargar e instalar **Godot 4.7** (o ejecutar la versión portable de Godot 4.7.x).
 2. Abrir el administrador de proyectos de Godot (*Project Manager*), presionar **Importar** y seleccionar el archivo `project.godot` ubicado en la raíz de este repositorio.
 3. Presionar **F5** (o el botón **Ejecutar proyecto** en la barra superior derecha).
-4. El juego iniciará en la escena de vestíbulo inicial (`res://spawn.tscn`). El personaje aparecerá en la plaza del spawn; desde allí, camina hacia el portal identificado con el texto **Parkour** para ingresar al nivel volcánico (`res://mundo.tscn`).
+4. El juego iniciará en la escena de vestíbulo inicial (`res://niveles/spawn/spawn.tscn`). El personaje aparecerá en la plaza del spawn; desde allí, camina hacia el portal identificado con el texto **Parkour** para ingresar al nivel volcánico (`res://niveles/mundo/mundo.tscn`).
 5. Para regresar al vestíbulo desde el nivel de parkour, cruza la puerta identificada como **Inicio** en la isla de partida.
 6. *(Nota: si en el editor estás editando `mundo.tscn` y presionas **F6**, se ejecutará solo esa escena. Usa siempre **F5** para iniciar el flujo completo desde el spawn).*
 
@@ -54,12 +54,33 @@ El orbe flota en la espalda mientras se transporta. En primera persona se oculta
 
 ## Organización
 
-- `partida.gd` coordina inicio, pausa, derrota, entrega y victoria. Es el único responsable de transferir el orbe entre pedestal, espalda y altar.
-- `jugador.gd` controla movimiento, salto, viento, cámaras y los estados normal, colgado, escalando y bloqueado.
-- `personaje.gd` construye y anima el personaje articulado; `orbe.tscn` y `orbe.gd` comparten el aspecto y la animación del orbe.
-- `mundo.tscn` contiene los apoyos y sus colisiones editables. `paisaje.gd` construye decoración determinista y `lava.gdshader` anima la lava.
-- `parkour_generador.gd` coloca los apoyos del parkour de forma aleatoria al entrar al nivel. Cada apoyo queda al alcance del anterior y la dificultad sube por sector. Los parámetros de distancia, altura y giro están en el script; `semilla` fija un mapa concreto.
-- `altar.gd` comunica interacciones por proximidad; `interfaz.gd` presenta los menús y las instrucciones.
+El proyecto se organiza **por funcionalidad**: cada pieza del juego tiene su propia carpeta con su escena y su script. Así quien trabaja en una pieza toca una sola carpeta y se reducen los conflictos de merge.
+
+```
+├── niveles/
+│   ├── spawn/      Vestíbulo inicial (escena principal)
+│   └── mundo/      Nivel volcánico: partida, generador de parkour, paisaje y lava
+├── jugador/        Movimiento del jugador y personaje articulado
+├── objetos/
+│   ├── orbe/       Orbe Sagrado
+│   ├── puerta/     Portales entre niveles
+│   ├── altar/      Altares (interacción por proximidad)
+│   └── viento/     Zonas de viento
+├── ui/             Menús e instrucciones
+├── assets/
+│   ├── texturas/   Texturas PBR
+│   └── audio/      Efectos de sonido y música
+└── tests/          Pruebas automáticas
+```
+
+- `niveles/mundo/partida.gd` coordina inicio, pausa, derrota, entrega y victoria. Es el único responsable de transferir el orbe entre pedestal, espalda y altar.
+- `jugador/jugador.gd` controla movimiento, salto, viento, cámaras y los estados normal, colgado, escalando y bloqueado.
+- `jugador/personaje.gd` construye y anima el personaje articulado; `objetos/orbe/orbe.tscn` y `orbe.gd` comparten el aspecto y la animación del orbe.
+- `niveles/mundo/mundo.tscn` contiene los apoyos y sus colisiones editables. `paisaje.gd` construye decoración determinista y `lava.gdshader` anima la lava.
+- `niveles/mundo/parkour_generador.gd` coloca los apoyos del parkour de forma aleatoria al entrar al nivel. Cada apoyo queda al alcance del anterior y la dificultad sube por sector. Los parámetros de distancia, altura y giro están en el script; `semilla` fija un mapa concreto.
+- `objetos/altar/altar.gd` comunica interacciones por proximidad; `ui/interfaz.gd` presenta los menús y las instrucciones.
+
+Las rutas escritas en el código (`preload(...)`, la propiedad `escena` de las puertas) no se actualizan solas al mover archivos. Si mueves algo, búscalas con **Ctrl+Shift+F** en el editor de scripts.
 
 Capas físicas: **1** sólidos, **2** superficies agarrables, **3** jugador. Los apoyos e isla pertenecen a las capas 1 y 2; los pedestales solo a la 1. La decoración no tiene colisión. El área de lava detecta al jugador y existe además un límite de altura para caídas fuera del mapa.
 

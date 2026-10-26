@@ -42,7 +42,7 @@ func cargar(inicio_directo: bool = true) -> void:
 		current_scene.free()
 	if inicio_directo:
 		set_meta("volcan_inicio_directo", true)
-	mundo = load("res://mundo.tscn").instantiate()
+	mundo = load("res://niveles/mundo/mundo.tscn").instantiate()
 	root.add_child(mundo)
 	current_scene = mundo
 	jugador = mundo.jugador
