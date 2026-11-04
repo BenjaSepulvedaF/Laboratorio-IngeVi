@@ -3,6 +3,7 @@ extends Node3D
 enum Estado { INICIO, JUGANDO, PAUSA, DERROTA, ENTREGA, VICTORIA }
 const ORBE = preload("res://objetos/orbe/orbe.tscn")
 const AUTO_INICIO := &"volcan_inicio_directo"
+const ORBE_LLEVADO := &"volcan_orbe_llevado"
 
 var estado: Estado = Estado.INICIO
 var estado_antes_pausa: Estado = Estado.JUGANDO
@@ -30,7 +31,12 @@ func _ready() -> void:
 	interfaz.jugar_solicitado.connect(_jugar)
 	interfaz.reinicio_solicitado.connect(reiniciar)
 	interfaz.pausa_solicitada.connect(_alternar_pausa)
-	_establecer_orbe("origen")
+	# Si se volvió por una puerta cargando el orbe, se conserva en la espalda. La marca
+	# se consume aquí: reintentar o reiniciar recargan la escena y el orbe vuelve al origen.
+	var llevado: bool = get_tree().get_meta(ORBE_LLEVADO, false)
+	if get_tree().has_meta(ORBE_LLEVADO):
+		get_tree().remove_meta(ORBE_LLEVADO)
+	_establecer_orbe("espalda" if llevado else "origen")
 	if get_tree().has_meta(AUTO_INICIO):
 		get_tree().remove_meta(AUTO_INICIO)
 		_jugar()

@@ -7,6 +7,8 @@ extends Area3D
 @export var texto := "Puerta"
 
 const AUTO_INICIO := &"volcan_inicio_directo"
+# Cambiar de escena destruye al jugador; esta marca lleva el orbe al nivel siguiente.
+const ORBE_LLEVADO := &"volcan_orbe_llevado"
 
 var activa := true
 
@@ -22,4 +24,5 @@ func _on_body_entered(body: Node3D) -> void:
 	activa = false
 	if marca_inicio:
 		get_tree().set_meta(AUTO_INICIO, true)
+	get_tree().set_meta(ORBE_LLEVADO, body.objeto_llevado != "")
 	get_tree().change_scene_to_file.call_deferred(escena)
