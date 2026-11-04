@@ -65,8 +65,10 @@ func _menu(nuevo: Estado) -> void:
 
 func _alternar_pausa() -> void:
 	if estado == Estado.PAUSA:
+		interfaz.reproducir_pausa()
 		_jugar()
 	elif estado == Estado.JUGANDO or estado == Estado.ENTREGA:
+		interfaz.reproducir_pausa()
 		estado_antes_pausa = estado
 		_menu(Estado.PAUSA)
 
@@ -108,6 +110,7 @@ func _interactuar(altar: Node3D, actor: CharacterBody3D) -> void:
 	if altar == origen and origen.tiene_objeto and jugador.objeto_llevado == "":
 		_establecer_orbe("espalda")
 		jugador.play_grab()
+		jugador.reproducir_orbe()
 	elif altar == destino and jugador.objeto_llevado != "" and not destino.completado:
 		_entregar()
 
@@ -118,6 +121,7 @@ func _entregar() -> void:
 	entrega_hasta = destino.orbe.global_position
 	jugador.bloquear()
 	jugador.play_grab()
+	jugador.reproducir_entrega()
 	_establecer_orbe("transito")
 	_animar_entrega(0.0)
 	tween_entrega = create_tween()
@@ -137,7 +141,9 @@ func _terminar_entrega() -> void:
 	destino.orbe.destellar()
 	tween_entrega = create_tween()
 	tween_entrega.tween_interval(0.4)
-	tween_entrega.tween_callback(func(): _menu(Estado.VICTORIA))
+	tween_entrega.tween_callback(func():
+		jugador.atenuar_entrega()
+		_menu(Estado.VICTORIA))
 
 
 func reiniciar() -> void:

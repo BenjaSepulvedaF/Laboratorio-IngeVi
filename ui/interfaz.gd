@@ -4,6 +4,10 @@ signal jugar_solicitado
 signal reinicio_solicitado
 signal pausa_solicitada
 
+const SONIDO_CLICK = preload("res://assets/audio/click_menu.wav")
+const SONIDO_PAUSA = preload("res://assets/audio/pausa.wav")
+const SONIDO_VICTORIA = preload("res://assets/audio/victoria.wav")
+
 var fondo: ColorRect
 var titulo: Label
 var descripcion: Label
@@ -12,12 +16,30 @@ var objetivo: Label
 var ayuda_borde: Label
 var hud: MarginContainer
 var menu_actual := "INICIO"
+var sonido_pausa: AudioStreamPlayer
+var sonido_victoria: AudioStreamPlayer
 
 
 func _ready() -> void:
+	# Always: la interfaz (y sus sonidos) funciona con el juego en pausa.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 10
 	_construir()
+	sonido_pausa = _reproductor(SONIDO_PAUSA)
+	sonido_victoria = _reproductor(SONIDO_VICTORIA)
+
+
+func _reproductor(sonido: AudioStream) -> AudioStreamPlayer:
+	var reproductor := AudioStreamPlayer.new()
+	reproductor.stream = sonido
+	reproductor.volume_db = -3.0
+	reproductor.bus = &"SFX"
+	add_child(reproductor)
+	return reproductor
+
+
+func reproducir_pausa() -> void:
+	sonido_pausa.play()
 
 
 func _texto(contenido: String, tamano: int, color: Color) -> Label:
@@ -117,6 +139,7 @@ func mostrar_menu(estado: String) -> void:
 			titulo.text = "Orbe colocado"
 			descripcion.text = "Has recuperado el corazón del volcán.\nRecorrido completado."
 			boton_principal.text = "Reiniciar escenario"
+			sonido_victoria.play()
 	boton_principal.grab_focus()
 
 
@@ -143,6 +166,8 @@ func mostrar_agarre(activo: bool) -> void:
 
 
 func _principal() -> void:
+	# Suelto: "Reintentar" y "Reiniciar escenario" recargan la escena y lo cortarían.
+	SonidoSuelto.reproducir(get_tree(), SONIDO_CLICK)
 	if menu_actual == "DERROTA" or menu_actual == "VICTORIA":
 		reinicio_solicitado.emit()
 	else:

@@ -8,6 +8,8 @@
 [ext_resource type="AudioStream" path="res://assets/audio/escalada.mp3" id="6_escalada"]
 [ext_resource type="AudioStream" path="res://assets/audio/orbe.wav" id="7_orbe"]
 [ext_resource type="AudioStream" path="res://assets/audio/death.mp3" id="8_muerte"]
+[ext_resource type="AudioStream" path="res://assets/audio/agacharse.mp3" id="9_agacharse"]
+[ext_resource type="AudioStream" path="res://assets/audio/orbe_entrega.wav" id="10_entrega"]
 
 [sub_resource type="CapsuleShape3D" id="Capsula"]
 radius = 0.36
@@ -69,5 +71,16 @@ bus = &"SFX"
 [node name="Muerte" type="AudioStreamPlayer" parent="Sonidos"]
 process_mode = 3
 stream = ExtResource("8_muerte")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="Agacharse" type="AudioStreamPlayer" parent="Sonidos"]
+stream = ExtResource("9_agacharse")
+volume_db = -3.0
+bus = &"SFX"
+
+[node name="Entrega" type="AudioStreamPlayer" parent="Sonidos"]
+process_mode = 3
+stream = ExtResource("10_entrega")
 volume_db = -3.0
 bus = &"SFX"

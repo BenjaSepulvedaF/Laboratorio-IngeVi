@@ -6,15 +6,24 @@ extends Area3D
 @export var duracion_rafaga := 0.5
 @export var intervalo := 2.2
 
+const SONIDO_RAFAGA = preload("res://assets/audio/viento.wav")
+const VOLUMEN_RAFAGA := -3.0
+
 var jugador = null
 var tiempo := 0.0
 var particulas: GPUParticles3D
+var sonido: AudioStreamPlayer
+var tween_sonido: Tween
 
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	_crear_particulas()
+	sonido = AudioStreamPlayer.new()
+	sonido.stream = SONIDO_RAFAGA
+	sonido.bus = &"SFX"
+	add_child(sonido)
 
 
 func _on_body_entered(body: Node3D) -> void:
@@ -74,3 +83,13 @@ func _mostrar_rafaga() -> void:
 	particulas.restart()
 	particulas.emitting = true
 	get_tree().create_timer(duracion_rafaga).timeout.connect(func(): particulas.emitting = false)
+	# viento.wav dura ~4.7 s, más que el intervalo entre ráfagas: suena mientras sopla
+	# y se desvanece antes de la siguiente para no encimarse.
+	if tween_sonido:
+		tween_sonido.kill()
+	sonido.volume_db = VOLUMEN_RAFAGA
+	sonido.play()
+	tween_sonido = create_tween()
+	tween_sonido.tween_interval(duracion_rafaga + 0.4)
+	tween_sonido.tween_property(sonido, "volume_db", -40.0, 0.8)
+	tween_sonido.tween_callback(sonido.stop)

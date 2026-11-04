@@ -55,6 +55,9 @@ var tween_agarre: Tween
 @onready var sonido_orbe: AudioStreamPlayer = $Sonidos/Orbe
 # Su process_mode es Always: al morir se pausa el juego y un sonido normal quedaría congelado.
 @onready var sonido_muerte: AudioStreamPlayer = $Sonidos/Muerte
+@onready var sonido_agacharse: AudioStreamPlayer = $Sonidos/Agacharse
+# También Always: sigue sonando cuando aparece el menú de victoria (juego en pausa).
+@onready var sonido_entrega: AudioStreamPlayer = $Sonidos/Entrega
 
 
 func _ready() -> void:
@@ -150,6 +153,7 @@ func _actualizar_agachado() -> void:
 		viento_restante = 0.0
 		velocidad_viento = Vector3.ZERO
 		jump_buffer_timer = 0.0
+		_reproducir(sonido_agacharse)
 	elif not quiere and agachado:
 		agachado = false
 
@@ -338,8 +342,26 @@ func play_grab() -> void:
 	tween_agarre = create_tween()
 	tween_agarre.tween_property(self, "grab_amount", 1.0, 0.2)
 	tween_agarre.tween_property(self, "grab_amount", 0.0, 0.5)
-	# play_grab() se llama al recoger y al entregar el orbe.
+
+
+func reproducir_orbe() -> void:
 	_reproducir(sonido_orbe)
+
+
+# Sin variar el tono: es melódico y desafinaría.
+func reproducir_entrega() -> void:
+	sonido_entrega.volume_db = -3.0
+	sonido_entrega.pitch_scale = 1.0
+	sonido_entrega.play()
+
+
+# Baja el sonido de la entrega para que no se encime con la música de victoria.
+func atenuar_entrega() -> void:
+	if not sonido_entrega.playing:
+		return
+	var tween := sonido_entrega.create_tween()
+	tween.tween_property(sonido_entrega, "volume_db", -40.0, 0.5)
+	tween.tween_callback(sonido_entrega.stop)
 
 
 # La llama partida.gd al morir, sea por tocar la lava o por caer fuera del mapa.
