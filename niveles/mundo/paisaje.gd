@@ -3,6 +3,14 @@ extends Node3D
 
 # Geometría decorativa determinista, visible también dentro del editor.
 # No tiene colisiones: únicamente los apoyos del circuito son transitables.
+
+# El circuito aleatorio llega como máximo hasta z ≈ -123 (medido en 300 mapas) y la
+# base del volcán mide hasta ~40 m de radio. Con el centro en -172 queda un margen
+# de ~9 m para que ni el jugador ni la cámara terminen dentro de la montaña.
+# Si se alarga el circuito o se agranda el volcán, hay que alejarlo de nuevo.
+const Z_VOLCAN := -172.0
+
+
 func _ready() -> void:
 	var anterior := get_node_or_null("Geometria")
 	if anterior:
@@ -26,7 +34,7 @@ func _ready() -> void:
 	roca.uv1_triplanar_sharpness = 4.0
 	roca.uv1_scale = Vector3(0.06, 0.06, 0.06)
 	# El volcán es un cono truncado irregular con cráter, no una montaña sólida.
-	_relieve(geometria, Vector3(0, -4, -127), 36.0, 32.0, 6.0, roca, rng)
+	_relieve(geometria, Vector3(0, -4, Z_VOLCAN), 36.0, 32.0, 6.0, roca, rng)
 	var fuego := StandardMaterial3D.new()
 	fuego.albedo_texture = preload("res://assets/texturas/lava/Lava004_1K-JPG_Color.jpg")
 	fuego.emission_enabled = true
@@ -38,7 +46,7 @@ func _ready() -> void:
 	crater.bottom_radius = 5.7
 	crater.height = 0.25
 	crater.radial_segments = 20
-	_malla(geometria, crater, fuego, Vector3(0, 27.2, -127))
+	_malla(geometria, crater, fuego, Vector3(0, 27.2, Z_VOLCAN))
 	for i in range(14):
 		var lado := -1.0 if i % 2 == 0 else 1.0
 		var posicion := Vector3(lado * rng.randf_range(28, 55), -5, 10 - i * 9)
