@@ -95,6 +95,9 @@ func _ready() -> void:
 # velocidad: velocidad horizontal en m/s.
 # agarre: 0..1, para la animación de recoger o colocar el objeto.
 func animar(velocidad: float, en_suelo: bool, agarre: float, delta: float, pose_borde: int = 0, progreso: float = 0.0) -> void:
+	if pose_borde == 3:
+		_animar_agachado(delta)
+		return
 	if pose_borde != 0:
 		_animar_borde(delta, pose_borde == 2, progreso)
 		return
@@ -141,6 +144,25 @@ func _animar_borde(delta: float, escalando: bool, progreso: float) -> void:
 	torso.rotation.z = lerpf(torso.rotation.z, 0.0, t)
 	cabeza.rotation.x = lerpf(cabeza.rotation.x, -0.2, t)
 	pelvis.position.y = lerpf(pelvis.position.y, PELVIS_Y, t)
+
+
+# Agachado y aferrado al suelo. Con el muslo a 1.3 rad y la pantorrilla a -2.2 rad,
+# la pierna mide ~0.41 m de alto, así que la pelvis baja a -0.59 para que los pies
+# sigan tocando el suelo (y = -1.0 del jugador).
+func _animar_agachado(delta: float) -> void:
+	var t := clampf(SUAVIZADO * delta, 0.0, 1.0)
+	_acercar(pierna_izq, 1.3, t)
+	_acercar(pierna_der, 1.3, t)
+	_acercar(pantorrilla_izq, -2.2, t)
+	_acercar(pantorrilla_der, -2.2, t)
+	_acercar(brazo_izq, 0.7, t)
+	_acercar(brazo_der, 0.7, t)
+	_acercar(antebrazo_izq, 0.5, t)
+	_acercar(antebrazo_der, 0.5, t)
+	torso.rotation.x = lerpf(torso.rotation.x, -0.45, t)
+	torso.rotation.z = lerpf(torso.rotation.z, 0.0, t)
+	cabeza.rotation.x = lerpf(cabeza.rotation.x, 0.35, t)
+	pelvis.position.y = lerpf(pelvis.position.y, -0.59, t)
 
 
 func _acercar(n: Node3D, rx: float, t: float) -> void:

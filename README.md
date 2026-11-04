@@ -42,6 +42,7 @@ Cruza los tres sectores del circuito, recoge el Orbe Sagrado del altar final y d
 | WASD / flechas | Moverse |
 | Ratón | Orientar al personaje y la cámara |
 | Espacio | Saltar; mantenerlo permite alcanzar mayor altura |
+| Shift (mantener) / B ○ en mando | Agacharse y aferrarse al suelo: inmune al viento y a cualquier empuje, pero sin poder moverse ni saltar |
 | E | Recoger o entregar el orbe cerca del altar |
 | V | Alternar primera y tercera persona |
 | Esc | Pausar / continuar, también durante escalada o entrega |

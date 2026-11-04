@@ -51,7 +51,7 @@ func _construir() -> void:
 	ayuda_borde.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ayuda_borde.visible = false
 	columna.add_child(ayuda_borde)
-	columna.add_child(_texto("WASD / Flechas: mover   ·   Espacio: saltar   ·   E: interactuar   ·   V: cámara   ·   Esc: pausa", 14, Color(0.9, 0.87, 0.8)))
+	columna.add_child(_texto("WASD / Flechas: mover   ·   Espacio: saltar   ·   Shift: agacharse   ·   E: interactuar   ·   V: cámara   ·   Esc: pausa", 14, Color(0.9, 0.87, 0.8)))
 	fondo = ColorRect.new()
 	fondo.color = Color(0.025, 0.018, 0.025, 0.82)
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

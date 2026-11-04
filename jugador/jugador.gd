@@ -39,6 +39,9 @@ var punto_elevado := Vector3.ZERO
 var punto_destino := Vector3.ZERO
 var ultima_posicion_suelo := Vector3.ZERO
 var velocidad_caida := 0.0
+# Agachado no es un Estado aparte: es una variante de NORMAL. Así el resto del juego
+# (partida, altares, pruebas) sigue tratando al jugador como "en pie y activo".
+var agachado := false
 var tween_agarre: Tween
 
 @onready var camera_pivot: Node3D = $CameraPivot
@@ -91,6 +94,10 @@ func _mover_normal(delta: float) -> void:
 	else:
 		# Los temporizadores restan segundos reales: su duración no depende de los FPS.
 		coyote_timer -= delta
+	_actualizar_agachado()
+	if agachado:
+		_mover_agachado(delta)
+		return
 	if Input.is_action_just_pressed("ui_accept"):
 		jump_buffer_timer = JUMP_BUFFER_TIME
 	else:
@@ -130,6 +137,30 @@ func _mover_normal(delta: float) -> void:
 	move_and_slide()
 	if not is_on_floor() and velocity.y <= 0.0 and bloqueo_agarre <= 0.0:
 		_buscar_borde()
+
+
+# Agacharse solo se puede en el suelo. Si se mantiene el botón en el aire, el
+# jugador se agacha apenas aterriza.
+func _actualizar_agachado() -> void:
+	var quiere := Input.is_action_pressed("agacharse") and is_on_floor()
+	if quiere and not agachado:
+		agachado = true
+		# Agarrarse al suelo corta en seco cualquier empuje que ya estuviera actuando.
+		viento = Vector3.ZERO
+		viento_restante = 0.0
+		velocidad_viento = Vector3.ZERO
+		jump_buffer_timer = 0.0
+	elif not quiere and agachado:
+		agachado = false
+
+
+# Agachado: inmune a empujes, a cambio de no poder caminar ni saltar.
+func _mover_agachado(delta: float) -> void:
+	# Frena con la misma aceleración del suelo (m/s², por eso se multiplica por delta).
+	velocity.x = move_toward(velocity.x, 0.0, ACCEL_GROUND * delta)
+	velocity.z = move_toward(velocity.z, 0.0, ACCEL_GROUND * delta)
+	velocidad_caida = -velocity.y
+	move_and_slide()
 
 
 # Se consulta la pared y luego su cara superior. La máscara solo incluye apoyos.
@@ -255,6 +286,7 @@ func _limpiar_impulsos() -> void:
 	coyote_timer = 0.0
 	jump_buffer_timer = 0.0
 	velocidad_caida = 0.0
+	agachado = false
 
 
 func bloquear() -> void:
@@ -285,12 +317,19 @@ func posicion_orbe() -> Vector3:
 	return visual.orbe_espalda.global_position
 
 
-func aplicar_viento(aceleracion: Vector3, duracion: float) -> bool:
-	if estado != Estado.NORMAL:
+## Punto de entrada único para cualquier empuje externo (viento, y a futuro
+## explosiones, enemigos, etc.). Devuelve false si el jugador no puede ser
+## empujado: colgado, escalando, bloqueado o agachado.
+func aplicar_empuje(aceleracion: Vector3, duracion: float) -> bool:
+	if estado != Estado.NORMAL or agachado:
 		return false
 	viento = aceleracion
 	viento_restante = duracion
 	return true
+
+
+func aplicar_viento(aceleracion: Vector3, duracion: float) -> bool:
+	return aplicar_empuje(aceleracion, duracion)
 
 
 func play_grab() -> void:
@@ -319,6 +358,8 @@ func _update_animation(delta: float) -> void:
 	var apoyado := is_on_floor()
 	var velocidad_horizontal := Vector2(velocity.x, velocity.z).length()
 	var pose_borde := 1 if estado == Estado.COLGADO else (2 if estado == Estado.ESCALANDO else 0)
+	if agachado and estado == Estado.NORMAL:
+		pose_borde = 3
 	visual.animar(velocidad_horizontal, apoyado or estado == Estado.BLOQUEADO, grab_amount, delta, pose_borde, progreso_escalada)
 	if estado == Estado.NORMAL and apoyado and not was_on_floor:
 		# Feedback del aterrizaje: aplastamiento del cuerpo y sonido en el mismo tick.

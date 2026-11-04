@@ -34,8 +34,10 @@ func _physics_process(delta: float) -> void:
 	tiempo -= delta
 	if tiempo <= 0.0:
 		tiempo = intervalo
-		if jugador.aplicar_viento(direccion.normalized() * aceleracion, duracion_rafaga):
-			_mostrar_rafaga()
+		# La ráfaga se ve siempre, aunque el jugador la resista (agachado o colgado):
+		# así nota que el viento sopló y que su acción lo protegió.
+		_mostrar_rafaga()
+		jugador.aplicar_viento(direccion.normalized() * aceleracion, duracion_rafaga)
 
 
 # Líneas semitransparentes que recorren la zona en la dirección del viento.
