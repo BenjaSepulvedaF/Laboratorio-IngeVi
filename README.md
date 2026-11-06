@@ -68,7 +68,7 @@ El proyecto se organiza **por funcionalidad**: cada pieza del juego tiene su pro
 │   ├── altar/      Altares (interacción por proximidad)
 │   └── viento/     Zonas de viento
 ├── ui/             Menús e instrucciones
-├── audio/          SonidoSuelto: sonidos que sobreviven a cambios de escena
+├── audio/          Música de fondo (autoload) y SonidoSuelto: sonidos que sobreviven a cambios de escena
 ├── assets/
 │   ├── texturas/   Texturas PBR
 │   └── audio/      Efectos de sonido y música

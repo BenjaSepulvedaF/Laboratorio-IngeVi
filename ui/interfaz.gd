@@ -157,6 +157,8 @@ func mostrar_objetivo(lugar: String) -> void:
 			objetivo.text = "Colocando el orbe…"
 		"destino":
 			objetivo.text = "Orbe colocado · Recorrido completado."
+		"vestibulo":
+			objetivo.text = "Cruza el portal Parkour para entrar al volcán."
 		_:
 			objetivo.text = "Recorre las plataformas y recupera el orbe."
 

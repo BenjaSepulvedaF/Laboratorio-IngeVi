@@ -25,6 +25,8 @@
 [ext_resource type="Texture2D" path="res://assets/texturas/lava/Lava004_1K-JPG_NormalGL.jpg" id="24_lava_normal"]
 [ext_resource type="Texture2D" path="res://assets/texturas/lava/Lava004_1K-JPG_Emission.jpg" id="25_lava_emision"]
 [ext_resource type="Texture2D" path="res://assets/texturas/lava/Lava004_1K-JPG_Roughness.jpg" id="26_lava_rough"]
+[ext_resource type="AudioStream" path="res://assets/audio/lava.mp3" id="27_lava_sonido"]
+[ext_resource type="AudioStream" path="res://assets/audio/bubble_pops.mp3" id="28_burbujas"]
 
 [sub_resource type="ProceduralSkyMaterial" id="CieloMaterial"]
 sky_top_color = Color(0.075, 0.065, 0.12, 1)
@@ -522,6 +524,20 @@ script = ExtResource("7_paisaje")
 
 [node name="Superficie" type="MeshInstance3D" parent="Lava"]
 mesh = SubResource("LavaMalla")
+
+[node name="SonidoLava" type="AudioStreamPlayer" parent="Lava"]
+process_mode = 3
+stream = ExtResource("27_lava_sonido")
+volume_db = -4.0
+autoplay = true
+bus = &"Ambiente"
+
+[node name="Burbujas" type="AudioStreamPlayer" parent="Lava"]
+process_mode = 3
+stream = ExtResource("28_burbujas")
+volume_db = -9.0
+autoplay = true
+bus = &"Ambiente"
 
 [node name="ZonaLetal" type="Area3D" parent="Lava"]
 position = Vector3(0, -10, 0)

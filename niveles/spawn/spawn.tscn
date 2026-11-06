@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://jugador/jugador.tscn" id="jugador_escena"]
 [ext_resource type="Script" path="res://niveles/spawn/spawn.gd" id="1_spawn"]
 [ext_resource type="PackedScene" path="res://objetos/puerta/puerta.tscn" id="4_puerta"]
+[ext_resource type="Script" path="res://ui/interfaz.gd" id="17_interfaz"]
 [ext_resource type="Texture2D" path="res://assets/texturas/cesped/Grass001_1K-JPG_Color.jpg" id="5_cesped_color"]
 [ext_resource type="Texture2D" path="res://assets/texturas/cesped/Grass001_1K-JPG_NormalGL.jpg" id="6_cesped_normal"]
 [ext_resource type="Texture2D" path="res://assets/texturas/cesped/Grass001_1K-JPG_Roughness.jpg" id="7_cesped_rough"]
@@ -250,3 +251,6 @@ position = Vector3(0, 1.5, 6)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9)
 escena = "res://niveles/mundo/mundo.tscn"
 texto = "Parkour"
+
+[node name="Interfaz" type="CanvasLayer" parent="."]
+script = ExtResource("17_interfaz")
