@@ -7,7 +7,7 @@ func _ejecutar() -> void:
 	seed(22062026)
 	await cargar()
 	await pasos(8)
-	var apoyos: Array[StaticBody3D] = [mundo.get_node("IslaInicial")]
+	var apoyos: Array[PhysicsBody3D] = [mundo.get_node("IslaInicial")]
 	for i in range(1, 25):
 		apoyos.append(mundo.get_node("Parkour/Apoyo%02d" % i))
 	for regreso in [false, true]:
@@ -22,6 +22,7 @@ func _ejecutar() -> void:
 			var exito := await saltar_entre(apoyos[i], apoyos[i + 1], false)
 			comprobar(exito, "Viaje continuo " + nombre)
 			if not exito:
+				for q in get_nodes_in_group("inestables"): print("  ", q.name, " fase ", q.Fase.keys()[q.fase])
 				print("VIAJE DETENIDO: ", nombre, " posición ", jugador.global_position, " estado ", jugador.estado)
 				paused = false
 				quit(1)

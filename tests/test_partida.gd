@@ -58,7 +58,7 @@ func recoger() -> void:
 	comprobar(not mundo.origen.orbe.visible and jugador.visual.orbe_espalda.visible, "El orbe pasa del pedestal a la espalda")
 
 
-func colocar_junto_borde(apoyo: StaticBody3D, direccion: Vector3) -> void:
+func colocar_junto_borde(apoyo: PhysicsBody3D, direccion: Vector3) -> void:
 	var forma: BoxShape3D = apoyo.get_node("CollisionShape3D").shape
 	var alto: float = apoyo.get_meta("altura_superficie")
 	var borde := Vector3(direccion.x * (forma.size.x * 0.5 + 0.42), 0, direccion.z * (forma.size.z * 0.5 + 0.42))
@@ -127,9 +127,9 @@ func _ejecutar() -> void:
 		await pasos(5)
 		comprobar(jugador.position.is_equal_approx(colgado), "Pausa colgado")
 		await tecla(KEY_ESCAPE)
-		Input.action_press("ui_accept")
+		Input.action_press("saltar")
 		await pasos(5)
-		Input.action_release("ui_accept")
+		Input.action_release("saltar")
 		comprobar(jugador.estado == jugador.Estado.ESCALANDO, "Espacio inicia escalada")
 		await tecla(KEY_ESCAPE)
 		posicion = jugador.position
@@ -140,9 +140,9 @@ func _ejecutar() -> void:
 		comprobar(jugador.estado == jugador.Estado.NORMAL and jugador.is_on_floor(), "Escalada termina sobre la plataforma")
 
 	await colocar_junto_borde(apoyo, Vector3.RIGHT)
-	Input.action_press("ui_down")
+	Input.action_press("mover_atras")
 	await pasos(2)
-	Input.action_release("ui_down")
+	Input.action_release("mover_atras")
 	comprobar(jugador.estado == jugador.Estado.NORMAL and jugador.bloqueo_agarre > 0.3, "S suelta con bloqueo de reagarre")
 	await pasos(5)
 	comprobar(jugador.estado == jugador.Estado.NORMAL, "No hay reagarre inmediato")
@@ -159,9 +159,9 @@ func _ejecutar() -> void:
 	await pasos(2)
 	await colocar_junto_borde(apoyo, Vector3.RIGHT)
 	comprobar(jugador.estado == jugador.Estado.COLGADO, "Un techo permite colgarse aunque impida subir")
-	Input.action_press("ui_accept")
+	Input.action_press("saltar")
 	await pasos(3)
-	Input.action_release("ui_accept")
+	Input.action_release("saltar")
 	comprobar(jugador.estado == jugador.Estado.COLGADO, "Destino bloqueado impide subir")
 	obstaculo.queue_free()
 	await pasos(2)
@@ -171,9 +171,9 @@ func _ejecutar() -> void:
 	apoyo = mundo.get_node("Parkour/Apoyo11")
 	await colocar_junto_borde(apoyo, Vector3.RIGHT)
 	comprobar(jugador.estado == jugador.Estado.COLGADO, "Agarre de viga con orbe")
-	Input.action_press("ui_accept")
+	Input.action_press("saltar")
 	await pasos(45)
-	Input.action_release("ui_accept")
+	Input.action_release("saltar")
 	comprobar(jugador.is_on_floor() and jugador.objeto_llevado != "", "Subir conserva el orbe")
 
 	jugador.global_position = mundo.destino.global_position + Vector3(0, 1.025, -1.5)

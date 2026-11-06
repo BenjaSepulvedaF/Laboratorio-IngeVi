@@ -27,6 +27,7 @@
 [ext_resource type="Texture2D" path="res://assets/texturas/lava/Lava004_1K-JPG_Roughness.jpg" id="26_lava_rough"]
 [ext_resource type="AudioStream" path="res://assets/audio/lava.mp3" id="27_lava_sonido"]
 [ext_resource type="AudioStream" path="res://assets/audio/bubble_pops.mp3" id="28_burbujas"]
+[ext_resource type="Script" path="res://objetos/plataforma_inestable/plataforma_inestable.gd" id="29_inestable"]
 
 [sub_resource type="ProceduralSkyMaterial" id="CieloMaterial"]
 sky_top_color = Color(0.075, 0.065, 0.12, 1)
@@ -818,7 +819,10 @@ mesh = SubResource("Cubierta11")
 position = Vector3(0, 0.43, -2.0)
 mesh = SubResource("Marca11")
 
-[node name="Apoyo12" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+[node name="Apoyo12" type="RigidBody3D" parent="Parkour" groups=["agarrable", "apoyos", "inestables"]]
+script = ExtResource("29_inestable")
+mass = 400.0
+freeze = true
 position = Vector3(2, 3.6999999999999997, -52)
 collision_layer = 3
 collision_mask = 4
@@ -902,7 +906,10 @@ mesh = SubResource("Cubierta15")
 position = Vector3(0, 0.43, -2.0)
 mesh = SubResource("Marca15")
 
-[node name="Apoyo16" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+[node name="Apoyo16" type="RigidBody3D" parent="Parkour" groups=["agarrable", "apoyos", "inestables"]]
+script = ExtResource("29_inestable")
+mass = 400.0
+freeze = true
 position = Vector3(-2, 3.6, -68)
 collision_layer = 3
 collision_mask = 4
@@ -1015,7 +1022,10 @@ mesh = SubResource("Cubierta20")
 position = Vector3(0, 0.43, -0.8500000000000001)
 mesh = SubResource("Marca20")
 
-[node name="Apoyo21" type="StaticBody3D" parent="Parkour" groups=["agarrable", "apoyos"]]
+[node name="Apoyo21" type="RigidBody3D" parent="Parkour" groups=["agarrable", "apoyos", "inestables"]]
+script = ExtResource("29_inestable")
+mass = 400.0
+freeze = true
 position = Vector3(-3.5, 3.9, -87.5)
 collision_layer = 3
 collision_mask = 4

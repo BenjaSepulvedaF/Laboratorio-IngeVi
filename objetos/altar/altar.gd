@@ -18,6 +18,7 @@ func _ready() -> void:
 	$Area3D.body_entered.connect(_on_body_entered)
 	$Area3D.body_exited.connect(_on_body_exited)
 	establecer_objeto(modo == Modo.RECOGER)
+	Dispositivo.cambiado.connect(func(_mando): actualizar_etiqueta())
 
 
 func establecer_objeto(presente: bool, terminado: bool = false) -> void:
@@ -40,7 +41,7 @@ func _on_body_exited(body: Node3D) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E):
+	if not event.is_action_pressed("interactuar"):
 		return
 	if not habilitado or jugador_cerca == null or not jugador_cerca.puede_interactuar():
 		return
@@ -54,10 +55,10 @@ func actualizar_etiqueta() -> void:
 	if modo == Modo.RECOGER:
 		etiqueta.text = "Orbe recuperado" if not tiene_objeto else nombre_objeto
 		if tiene_objeto and jugador_cerca != null and habilitado:
-			etiqueta.text = "[E] Recoger " + nombre_objeto
+			etiqueta.text = Dispositivo.texto("[E]", "[Botón X]") + " Recoger " + nombre_objeto
 	elif completado:
 		etiqueta.text = "Orbe colocado"
 	elif jugador_cerca != null and habilitado:
-		etiqueta.text = "[E] Colocar el orbe" if jugador_cerca.objeto_llevado != "" else "Recupera el orbe"
+		etiqueta.text = Dispositivo.texto("[E]", "[Botón X]") + " Colocar el orbe" if jugador_cerca.objeto_llevado != "" else "Recupera el orbe"
 	else:
 		etiqueta.text = "Altar de origen"

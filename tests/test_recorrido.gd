@@ -2,7 +2,7 @@ extends "res://tests/test_partida.gd"
 
 
 func soltar_controles() -> void:
-	for accion in ["ui_up", "ui_down", "ui_left", "ui_right", "ui_accept"]:
+	for accion in ["mover_adelante", "mover_atras", "mover_izquierda", "mover_derecha", "saltar"]:
 		Input.action_release(accion)
 
 
@@ -10,16 +10,16 @@ func dirigir(velocidad_deseada: Vector3) -> void:
 	var local: Vector3 = (jugador.global_basis.inverse() * (velocidad_deseada - jugador.velocidad_viento) / jugador.SPEED).limit_length(1.0)
 	if local.length() > 0.01:
 		local = local.normalized() * (0.5 + local.length() * 0.5)
-	for accion in ["ui_up", "ui_down", "ui_left", "ui_right"]:
+	for accion in ["mover_adelante", "mover_atras", "mover_izquierda", "mover_derecha"]:
 		Input.action_release(accion)
 	if local.z < 0:
-		Input.action_press("ui_up", -local.z)
+		Input.action_press("mover_adelante", -local.z)
 	else:
-		Input.action_press("ui_down", local.z)
+		Input.action_press("mover_atras", local.z)
 	if local.x < 0:
-		Input.action_press("ui_left", -local.x)
+		Input.action_press("mover_izquierda", -local.x)
 	else:
-		Input.action_press("ui_right", local.x)
+		Input.action_press("mover_derecha", local.x)
 
 
 func caminar_hasta(objetivo: Vector3) -> bool:
@@ -36,7 +36,7 @@ func caminar_hasta(objetivo: Vector3) -> bool:
 	return false
 
 
-func saltar_entre(desde: StaticBody3D, hasta: StaticBody3D, preparar: bool = true) -> bool:
+func saltar_entre(desde: PhysicsBody3D, hasta: PhysicsBody3D, preparar: bool = true) -> bool:
 	soltar_controles()
 	var forma: BoxShape3D = desde.get_node("CollisionShape3D").shape
 	var objetivo_forma: BoxShape3D = hasta.get_node("CollisionShape3D").shape
@@ -56,7 +56,7 @@ func saltar_entre(desde: StaticBody3D, hasta: StaticBody3D, preparar: bool = tru
 		jugador.look_at(jugador.global_position + direccion)
 		await pasos(4)
 		jugador.velocity = direccion * jugador.SPEED
-		Input.action_press("ui_up")
+		Input.action_press("mover_adelante")
 	else:
 		var lanzamiento: Vector3 = desde.global_position + direccion * distancia_borde
 		if not await caminar_hasta(lanzamiento - direccion * 0.8):
@@ -68,7 +68,7 @@ func saltar_entre(desde: StaticBody3D, hasta: StaticBody3D, preparar: bool = tru
 				break
 			dirigir(direccion * jugador.SPEED)
 			await pasos(1)
-	Input.action_press("ui_accept")
+	Input.action_press("saltar")
 	var estuvo_en_aire := false
 	var termino := false
 	for frame in range(110):
@@ -81,10 +81,10 @@ func saltar_entre(desde: StaticBody3D, hasta: StaticBody3D, preparar: bool = tru
 		if mundo.estado == mundo.Estado.DERROTA:
 			break
 		if jugador.estado == jugador.Estado.COLGADO:
-			Input.action_release("ui_up")
-			Input.action_release("ui_accept")
+			Input.action_release("mover_adelante")
+			Input.action_release("saltar")
 			await pasos(1)
-			Input.action_press("ui_accept")
+			Input.action_press("saltar")
 			await pasos(45)
 			termino = jugador.is_on_floor()
 			break
@@ -104,7 +104,7 @@ func saltar_entre(desde: StaticBody3D, hasta: StaticBody3D, preparar: bool = tru
 
 func _ejecutar() -> void:
 	await cargar()
-	var apoyos: Array[StaticBody3D] = [mundo.get_node("IslaInicial")]
+	var apoyos: Array[PhysicsBody3D] = [mundo.get_node("IslaInicial")]
 	for i in range(1, 25):
 		apoyos.append(mundo.get_node("Parkour/Apoyo%02d" % i))
 	for regreso in [false, true]:

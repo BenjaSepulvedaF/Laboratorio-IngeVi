@@ -14,6 +14,7 @@ var descripcion: Label
 var boton_principal: Button
 var objetivo: Label
 var ayuda_borde: Label
+var ayuda_controles: Label
 var hud: MarginContainer
 var menu_actual := "INICIO"
 var sonido_pausa: AudioStreamPlayer
@@ -69,11 +70,14 @@ func _construir() -> void:
 	espacio.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	espacio.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	columna.add_child(espacio)
-	ayuda_borde = _texto("Espacio: subir · S: soltarse", 23, Color(0.5, 0.95, 1))
+	ayuda_borde = _texto("", 23, Color(0.5, 0.95, 1))
 	ayuda_borde.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ayuda_borde.visible = false
 	columna.add_child(ayuda_borde)
-	columna.add_child(_texto("WASD / Flechas: mover   ·   Espacio: saltar   ·   Shift: agacharse   ·   E: interactuar   ·   V: cámara   ·   Esc: pausa", 14, Color(0.9, 0.87, 0.8)))
+	ayuda_controles = _texto("", 14, Color(0.9, 0.87, 0.8))
+	columna.add_child(ayuda_controles)
+	_actualizar_ayudas()
+	Dispositivo.cambiado.connect(func(_mando): _actualizar_ayudas())
 	fondo = ColorRect.new()
 	fondo.color = Color(0.025, 0.018, 0.025, 0.82)
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -116,6 +120,14 @@ func _construir() -> void:
 	salir.custom_minimum_size = Vector2(0, 42)
 	salir.pressed.connect(func(): get_tree().quit())
 	caja.add_child(salir)
+
+
+# Los textos de ayuda muestran solo los botones del dispositivo en uso.
+func _actualizar_ayudas() -> void:
+	ayuda_borde.text = Dispositivo.texto("Espacio: subir · S: soltarse", "Botón A: subir · Abajo: soltarse")
+	ayuda_controles.text = Dispositivo.texto(
+		"WASD / Flechas: mover   ·   Espacio: saltar   ·   Shift: agacharse   ·   E: interactuar   ·   V: cámara   ·   Esc: pausa",
+		"Stick izq.: mover   ·   Stick der.: cámara   ·   A: saltar   ·   B: agacharse   ·   X: interactuar   ·   Y: vista   ·   Start: pausa")
 
 
 func mostrar_menu(estado: String) -> void:
@@ -177,6 +189,6 @@ func _principal() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
+	if event.is_action_pressed("pausa"):
 		pausa_solicitada.emit()
 		get_viewport().set_input_as_handled()

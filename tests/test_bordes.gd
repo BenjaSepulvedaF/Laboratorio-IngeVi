@@ -7,14 +7,19 @@ func _ejecutar() -> void:
 	for i in range(1, 25):
 		var apoyo = mundo.get_node("Parkour/Apoyo%02d" % i)
 		for direccion in [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK]:
+			# Las plataformas inestables caen al agarrarlas; aquí solo se revisan sus
+			# caras, así que se reponen antes de cada una (el derrumbe lo prueba test_inestables).
+			if apoyo.is_in_group("inestables"):
+				apoyo.restablecer()
+				await pasos(2)
 			await colocar_junto_borde(apoyo, direccion)
 			comprobar(jugador.estado == jugador.Estado.COLGADO, "Cara agarrable de " + apoyo.name + " " + str(direccion))
 			comprobar(jugador.objeto_llevado != "" and jugador.visual.orbe_espalda.visible, "Colgarse conserva el orbe")
 			if jugador.estado != jugador.Estado.COLGADO:
 				continue
-			Input.action_press("ui_accept")
+			Input.action_press("saltar")
 			await pasos(42)
-			Input.action_release("ui_accept")
+			Input.action_release("saltar")
 			comprobar(jugador.estado == jugador.Estado.NORMAL and jugador.is_on_floor(), "Escalada en " + apoyo.name + " " + str(direccion))
 
 	var apoyo = mundo.get_node("Parkour/Apoyo01")
@@ -23,9 +28,9 @@ func _ejecutar() -> void:
 	comprobar(jugador.first_person and not jugador.visual.is_visible_in_tree(), "Cámara en primera persona al colgarse")
 	await pasos(650)
 	comprobar(jugador.estado == jugador.Estado.COLGADO, "El agarre no tiene límite de tiempo")
-	Input.action_press("ui_accept")
+	Input.action_press("saltar")
 	await pasos(42)
-	Input.action_release("ui_accept")
+	Input.action_release("saltar")
 	comprobar(jugador.is_on_floor() and jugador.first_person, "Escalada en primera persona")
 	await tecla(KEY_V)
 

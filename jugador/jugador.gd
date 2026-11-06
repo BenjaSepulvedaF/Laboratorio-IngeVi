@@ -7,6 +7,8 @@ enum Estado { NORMAL, COLGADO, ESCALANDO, BLOQUEADO }
 const SPEED := 5.0
 const JUMP_VELOCITY := 4.5
 const MOUSE_SENSITIVITY := 0.003
+# Giro de cámara con el stick derecho del mando, en radianes por segundo.
+const VELOCIDAD_CAMARA_MANDO := 2.6
 const THIRD_PERSON_DISTANCE := 4.0
 const ACCEL_GROUND := 40.0
 const ACCEL_AIR := 12.0
@@ -43,6 +45,8 @@ var velocidad_caida := 0.0
 # (partida, altares, pruebas) sigue tratando al jugador como "en pie y activo".
 var agachado := false
 var tween_agarre: Tween
+# Cuerpo del que está colgado: si es una plataforma inestable que cae, lo suelta.
+var borde_agarrado: Node3D = null
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
@@ -77,12 +81,18 @@ func _physics_process(delta: float) -> void:
 		Estado.NORMAL:
 			_mover_normal(delta)
 		Estado.COLGADO:
-			if Input.is_action_just_pressed("ui_down"):
+			if Input.is_action_just_pressed("mover_atras"):
 				_soltarse()
-			elif Input.is_action_just_pressed("ui_accept"):
+			elif Input.is_action_just_pressed("saltar"):
 				_iniciar_escalada()
 		Estado.ESCALANDO:
 			_escalar(delta)
+	if estado != Estado.BLOQUEADO:
+		# El stick es un valor continuo (no un evento), así que se lee cada tick y se
+		# multiplica por delta: la cámara gira lo mismo por segundo a cualquier tasa.
+		var mirar := Input.get_vector("camara_izquierda", "camara_derecha", "camara_arriba", "camara_abajo")
+		if mirar != Vector2.ZERO:
+			_girar_camara(mirar * VELOCIDAD_CAMARA_MANDO * delta)
 	_update_animation(delta)
 	if estado != Estado.BLOQUEADO and global_position.y < -8.0:
 		caida.emit()
@@ -101,7 +111,7 @@ func _mover_normal(delta: float) -> void:
 	if agachado:
 		_mover_agachado(delta)
 		return
-	if Input.is_action_just_pressed("ui_accept"):
+	if Input.is_action_just_pressed("saltar"):
 		jump_buffer_timer = JUMP_BUFFER_TIME
 	else:
 		jump_buffer_timer -= delta
@@ -118,9 +128,9 @@ func _mover_normal(delta: float) -> void:
 		# Feedback del salto: sonido y estirón del cuerpo en el mismo tick del impulso.
 		_reproducir(sonido_salto)
 		visual.scale = Vector3(0.9, 1.15, 0.9)
-	if Input.is_action_just_released("ui_accept") and velocity.y > 0:
+	if Input.is_action_just_released("saltar") and velocity.y > 0:
 		velocity.y *= JUMP_CUT
-	var entrada := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	var entrada := Input.get_vector("mover_izquierda", "mover_derecha", "mover_adelante", "mover_atras")
 	var direccion := global_basis * Vector3(entrada.x, 0, entrada.y)
 	# La aceleración está en m/s². Con delta, cada tick cambia la velocidad solo lo que
 	# corresponde a ese tiempo: a 30 o 144 FPS se llega a la misma velocidad en el mismo tiempo.
@@ -212,6 +222,7 @@ func _buscar_borde() -> void:
 		camera_pivot.rotation.y = 0.0
 		velocity = Vector3.ZERO
 		_limpiar_impulsos()
+		borde_agarrado = pared.collider
 		estado = Estado.COLGADO
 		was_on_floor = false
 		agarre_cambiado.emit(true)
@@ -274,7 +285,14 @@ func _escalar(delta: float) -> void:
 		camera_pivot.rotation.y = 0.0
 
 
+# Para objetos externos: una plataforma que se derrumba suelta al jugador colgado.
+func soltar_borde() -> void:
+	if estado == Estado.COLGADO or estado == Estado.ESCALANDO:
+		_soltarse()
+
+
 func _soltarse() -> void:
+	borde_agarrado = null
 	estado = Estado.NORMAL
 	velocity = Vector3(0, -0.6, 0)
 	bloqueo_agarre = BLOQUEO_REAGARRE
@@ -395,15 +413,22 @@ func _update_animation(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if estado == Estado.BLOQUEADO:
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_V:
+	if event.is_action_pressed("cambiar_camara"):
 		first_person = not first_person
 		_apply_camera_mode()
+	# El ratón entrega desplazamientos (no un valor continuo como el stick), por eso
+	# se lee como evento y no como acción del InputMap.
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if estado == Estado.NORMAL:
-			rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
-		else:
-			camera_pivot.rotation.y = clampf(camera_pivot.rotation.y - event.relative.x * MOUSE_SENSITIVITY, -1.1, 1.1)
-		camera_pivot.rotation.x = clampf(camera_pivot.rotation.x - event.relative.y * MOUSE_SENSITIVITY, deg_to_rad(-65), deg_to_rad(45))
+		_girar_camara(event.relative * MOUSE_SENSITIVITY)
+
+
+# Giro en radianes, compartido por ratón y stick derecho.
+func _girar_camara(giro: Vector2) -> void:
+	if estado == Estado.NORMAL:
+		rotate_y(-giro.x)
+	else:
+		camera_pivot.rotation.y = clampf(camera_pivot.rotation.y - giro.x, -1.1, 1.1)
+	camera_pivot.rotation.x = clampf(camera_pivot.rotation.x - giro.y, deg_to_rad(-65), deg_to_rad(45))
 
 
 func _apply_camera_mode() -> void:

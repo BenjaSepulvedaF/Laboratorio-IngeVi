@@ -19,11 +19,13 @@ const INTENTOS := 200
 var distancia_por_sector := [Vector2(1.3, 1.9), Vector2(1.6, 2.3), Vector2(1.9, 2.7)]
 var altura_por_sector := [Vector2(-0.2, 0.4), Vector2(-0.4, 0.5), Vector2(-0.5, 0.6)]
 var giro_por_sector := [0.6, 0.8, 0.95]
-# Índice (base 0) del apoyo donde se coloca cada zona de viento.
+# Índice (base 0) del apoyo donde se coloca cada zona de viento. Esos apoyos
+# (Apoyo12, Apoyo16 y Apoyo21) son las plataformas inestables en mundo.tscn.
 var indices_viento := {"ZonaViento1": 11, "ZonaViento2": 15, "ZonaViento3": 20}
 
 var rng := RandomNumberGenerator.new()
-var apoyos: Array[StaticBody3D] = []
+# PhysicsBody3D: la mayoría son StaticBody3D y las plataformas inestables, RigidBody3D.
+var apoyos: Array[PhysicsBody3D] = []
 var tamanos: Array[Vector3] = []
 var alturas: Array[float] = []
 
@@ -34,7 +36,7 @@ func _ready() -> void:
 	else:
 		rng.randomize()
 	for i in range(1, TOTAL_APOYOS + 1):
-		var apoyo := get_node("Apoyo%02d" % i) as StaticBody3D
+		var apoyo := get_node("Apoyo%02d" % i) as PhysicsBody3D
 		apoyos.append(apoyo)
 		tamanos.append((apoyo.get_node("CollisionShape3D").shape as BoxShape3D).size)
 	alturas.append(apoyos[0].position.y + tamanos[0].y * 0.5)
