@@ -55,7 +55,7 @@ bus = &"SFX"
 
 [node name="Agarre" type="AudioStreamPlayer" parent="Sonidos"]
 stream = ExtResource("5_agarre")
-volume_db = -3.0
+volume_db = 1.0
 bus = &"SFX"
 
 [node name="Escalada" type="AudioStreamPlayer" parent="Sonidos"]

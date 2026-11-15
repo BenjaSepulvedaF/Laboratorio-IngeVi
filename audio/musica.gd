@@ -8,7 +8,7 @@ extends Node
 # reproductores: cuando uno llega al fundido final, el otro empieza desde el principio
 # y se mezclan (crossfade).
 const MUSICA = preload("res://assets/audio/musica_loop.mp3")
-const VOLUMEN := -12.0
+const VOLUMEN := -18.0
 const INICIO := 0.28 # salta el silencio inicial
 const ANTES_DEL_FINAL := 5.0 # segundos antes del final en que empieza el cruce
 const CRUCE := 3.0
