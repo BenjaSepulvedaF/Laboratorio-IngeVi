@@ -3,6 +3,7 @@ extends CanvasLayer
 signal jugar_solicitado
 signal reinicio_solicitado
 signal pausa_solicitada
+signal vestibulo_solicitado
 
 const SONIDO_CLICK = preload("res://assets/audio/click_menu.wav")
 const SONIDO_PAUSA = preload("res://assets/audio/pausa.wav")
@@ -17,6 +18,13 @@ var ayuda_borde: Label
 var ayuda_controles: Label
 var hud: MarginContainer
 var menu_actual := "INICIO"
+var barra_salud: BarraSalud
+var boton_vestibulo: Button
+var tween_fondo: Tween
+# La fija partida.gd antes de mostrar la derrota: "calor", "lava" o "caida".
+var causa_derrota := ""
+# Solo los niveles ofrecen volver al vestíbulo (en el vestíbulo no tiene sentido).
+var permite_vestibulo := false
 var sonido_pausa: AudioStreamPlayer
 var sonido_victoria: AudioStreamPlayer
 
@@ -66,6 +74,8 @@ func _construir() -> void:
 	columna.add_child(_texto("EL CORAZÓN DEL VOLCÁN", 14, Color(1, 0.7, 0.35)))
 	objetivo = _texto("Recorre las plataformas y recupera el orbe.", 18, Color(0.95, 0.93, 0.88))
 	columna.add_child(objetivo)
+	barra_salud = BarraSalud.new()
+	columna.add_child(barra_salud)
 	var espacio := Control.new()
 	espacio.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	espacio.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -115,6 +125,13 @@ func _construir() -> void:
 	boton_principal.add_theme_font_size_override("font_size", 19)
 	boton_principal.pressed.connect(_principal)
 	caja.add_child(boton_principal)
+	boton_vestibulo = Button.new()
+	boton_vestibulo.text = "Volver al vestíbulo"
+	boton_vestibulo.custom_minimum_size = Vector2(0, 42)
+	boton_vestibulo.pressed.connect(func():
+		SonidoSuelto.reproducir(get_tree(), SONIDO_CLICK)
+		vestibulo_solicitado.emit())
+	caja.add_child(boton_vestibulo)
 	var salir := Button.new()
 	salir.text = "Salir"
 	salir.custom_minimum_size = Vector2(0, 42)
@@ -130,22 +147,37 @@ func _actualizar_ayudas() -> void:
 		"Stick izq.: mover   ·   Stick der.: cámara   ·   A: saltar   ·   B: agacharse   ·   X: interactuar   ·   Y: vista   ·   Start: pausa")
 
 
+func conectar_salud(salud: Salud) -> void:
+	barra_salud.conectar(salud)
+
+
 func mostrar_menu(estado: String) -> void:
 	menu_actual = estado
 	fondo.show()
 	hud.hide()
+	boton_vestibulo.visible = permite_vestibulo and estado != "INICIO"
+	# Aparición con fundido: el paso del juego al menú no es un corte seco.
+	if tween_fondo:
+		tween_fondo.kill()
+	fondo.modulate.a = 0.0
+	tween_fondo = create_tween()
+	tween_fondo.tween_property(fondo, "modulate:a", 1.0, 0.35)
 	match estado:
 		"INICIO":
 			titulo.text = "El corazón del volcán"
-			descripcion.text = "Cruza la lava, recupera el orbe\ny devuélvelo al altar de origen.\n\nSi caes, tendrás que empezar de nuevo."
+			descripcion.text = "Cruza la lava, recupera el orbe\ny devuélvelo al altar de origen.\n\nEl calor consume tu resistencia: no te detengas.\nSi caes o te quemas, empiezas de nuevo."
 			boton_principal.text = "Jugar"
 		"PAUSA":
 			titulo.text = "Pausa"
 			descripcion.text = "El volcán puede esperar."
 			boton_principal.text = "Continuar"
 		"DERROTA":
-			titulo.text = "Has caído"
-			descripcion.text = "El orbe ha vuelto a su pedestal.\nEl siguiente intento comienza desde el principio."
+			if causa_derrota == "calor":
+				titulo.text = "El calor te venció"
+				descripcion.text = "Tu resistencia se agotó.\nEl orbe ha vuelto a su pedestal."
+			else:
+				titulo.text = "Has caído"
+				descripcion.text = "El orbe ha vuelto a su pedestal.\nEl siguiente intento comienza desde el principio."
 			boton_principal.text = "Reintentar"
 		"VICTORIA":
 			titulo.text = "Orbe colocado"

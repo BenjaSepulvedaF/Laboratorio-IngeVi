@@ -4,6 +4,9 @@ var fallos := 0
 var comprobaciones := 0
 var mundo
 var jugador
+# Las pruebas que teletransportan al jugador durante minutos (bordes, recorrido)
+# apagan el calor: revisan geometría, no la resistencia.
+var calor_activo := true
 
 
 func _initialize() -> void:
@@ -46,6 +49,8 @@ func cargar(inicio_directo: bool = true) -> void:
 	root.add_child(mundo)
 	current_scene = mundo
 	jugador = mundo.jugador
+	if not calor_activo:
+		mundo.calor.set_physics_process(false)
 	await pasos(3)
 
 

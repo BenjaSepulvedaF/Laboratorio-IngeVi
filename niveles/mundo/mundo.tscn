@@ -28,6 +28,7 @@
 [ext_resource type="AudioStream" path="res://assets/audio/lava.mp3" id="27_lava_sonido"]
 [ext_resource type="AudioStream" path="res://assets/audio/bubble_pops.mp3" id="28_burbujas"]
 [ext_resource type="Script" path="res://objetos/plataforma_inestable/plataforma_inestable.gd" id="29_inestable"]
+[ext_resource type="Script" path="res://niveles/mundo/calor.gd" id="30_calor"]
 
 [sub_resource type="ProceduralSkyMaterial" id="CieloMaterial"]
 sky_top_color = Color(0.075, 0.065, 0.12, 1)
@@ -565,6 +566,9 @@ mesh = SubResource("IslaCubierta")
 
 [node name="Jugador" parent="." instance=ExtResource("jugador_escena")]
 position = Vector3(0, 4.025, 1)
+
+[node name="Calor" type="Node" parent="."]
+script = ExtResource("30_calor")
 
 [node name="Interfaz" type="CanvasLayer" parent="."]
 script = ExtResource("4_interfaz")

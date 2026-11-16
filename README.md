@@ -40,6 +40,8 @@ Cruza los tres sectores del circuito, recoge el Orbe Sagrado del altar final y d
 
 **Mecánica principal:** el salto entre plataformas sobre la lava, con agarre de bordes. La complican las ráfagas de viento (que se resisten agachándose) y las plataformas inestables.
 
+**Calor (sistema de salud):** la barra **CALOR** del HUD es tu resistencia. En el volcán baja sola (la barra llena dura 90 s) y el doble de rápido dentro de las zonas de viento. Recoger el orbe la llena. Si llega a cero aparece **El calor te venció**; caer a la lava la vacía de golpe. Con poca resistencia la barra late en rojo, y al recuperarse destella en celeste. Las pantallas de derrota, pausa y victoria ofrecen **Volver al vestíbulo**.
+
 **Plataformas inestables:** los tres apoyos bajo las zonas de viento tienen grietas incandescentes. Al pisarlos o colgarse de ellos tiemblan durante 1.5 s, con las grietas cada vez más brillantes y un crujido, y luego se desploman a la lava. Unos 3.5 s después reaparecen en su sitio, así que el regreso con el orbe sigue siendo posible. Agacharse protege del viento, pero no del derrumbe: el jugador no puede quedarse quieto.
 
 ### Controles
@@ -92,6 +94,7 @@ El proyecto se organiza **por funcionalidad**: cada pieza del juego tiene su pro
 - `niveles/mundo/mundo.tscn` contiene los apoyos y sus colisiones editables. `paisaje.gd` construye decoración determinista y `lava.gdshader` anima la lava.
 - `niveles/mundo/parkour_generador.gd` coloca los apoyos del parkour de forma aleatoria al entrar al nivel. Cada apoyo queda al alcance del anterior y la dificultad sube por sector. Los parámetros de distancia, altura y giro están en el script; `semilla` fija un mapa concreto.
 - `objetos/plataforma_inestable/plataforma_inestable.gd` es un `RigidBody3D` congelado (`freeze`) mientras está estable. Al derrumbarse se descongela y su caída la calcula el motor de física (Jolt). Apoyo12, Apoyo16 y Apoyo21 en `mundo.tscn` usan este script. Si se agregan `assets/audio/crujido.wav` y `derrumbe.wav` (también .mp3 / .ogg), se usan automáticamente.
+- `jugador/salud.gd` (`Salud`) es un componente reutilizable: lleva la salud y avisa con las señales `cambiada` y `agotada`. No sabe qué causa el daño. En el volcán lo quema `niveles/mundo/calor.gd`, y `ui/barra_salud.gd` lo muestra en el HUD conectándose a esas señales (patrón Observer, sin consultar la salud cada frame).
 - `objetos/altar/altar.gd` comunica interacciones por proximidad; `ui/interfaz.gd` presenta los menús y las instrucciones.
 - `audio/musica.gd` (autoload `Musica`) mantiene la música entre escenas y la mezcla consigo misma al repetirse. Buses de audio: **SFX**, **Musica** y **Ambiente**.
 
@@ -109,6 +112,7 @@ godot --headless --path . --script res://tests/test_bordes.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_recorrido.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_viaje.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_inestables.gd --fixed-fps 120
+godot --headless --path . --script res://tests/test_salud.gd --fixed-fps 120
 ```
 
 Las pruebas cubren transferencias del orbe, lava, reintentos, cámaras, pausa, entrega y victoria; caras y esquinas agarrables, obstrucciones, soltarse y ausencia de límite de tiempo; los 48 saltos individuales de ida/vuelta; y un viaje continuo desde la aparición hasta la victoria, con viento activo. En la prueba continua el jugador usa las acciones de movimiento y salto, sin teletransportes ni cambios artificiales de velocidad. `test_inestables` comprueba el temblor, la caída por física, la reaparición, el derrumbe estando colgado y las acciones con mando (botones y sticks).

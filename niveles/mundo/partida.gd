@@ -4,6 +4,7 @@ enum Estado { INICIO, JUGANDO, PAUSA, DERROTA, ENTREGA, VICTORIA }
 const ORBE = preload("res://objetos/orbe/orbe.tscn")
 const AUTO_INICIO := &"volcan_inicio_directo"
 const ORBE_LLEVADO := &"volcan_orbe_llevado"
+const VESTIBULO := "res://niveles/spawn/spawn.tscn"
 
 var estado: Estado = Estado.INICIO
 var estado_antes_pausa: Estado = Estado.JUGANDO
@@ -15,6 +16,7 @@ var entrega_hasta := Vector3.ZERO
 @onready var origen = $AltarRecoger
 @onready var destino = $AltarColocar
 @onready var interfaz = $Interfaz
+@onready var calor = $Calor
 
 
 func _ready() -> void:
@@ -25,12 +27,19 @@ func _ready() -> void:
 	add_child(orbe_transito)
 	origen.interaccion_solicitada.connect(_interactuar)
 	destino.interaccion_solicitada.connect(_interactuar)
-	jugador.caida.connect(_morir)
+	# Toda muerte pasa por la salud: caer fuera del mapa o a la lava la vacía, y el
+	# calor la va gastando. Cuando llega a cero, la salud avisa y se pierde.
+	jugador.caida.connect(func(): jugador.salud.vaciar("caida"))
+	jugador.salud.agotada.connect(_morir)
+	calor.salud = jugador.salud
+	interfaz.conectar_salud(jugador.salud)
 	jugador.agarre_cambiado.connect(interfaz.mostrar_agarre)
 	$Lava/ZonaLetal.body_entered.connect(_tocar_lava)
 	interfaz.jugar_solicitado.connect(_jugar)
 	interfaz.reinicio_solicitado.connect(reiniciar)
 	interfaz.pausa_solicitada.connect(_alternar_pausa)
+	interfaz.permite_vestibulo = true
+	interfaz.vestibulo_solicitado.connect(_volver_al_vestibulo)
 	# Si se volvió por una puerta cargando el orbe, se conserva en la espalda. La marca
 	# se consume aquí: reintentar o reiniciar recargan la escena y el orbe vuelve al origen.
 	var llevado: bool = get_tree().get_meta(ORBE_LLEVADO, false)
@@ -52,12 +61,14 @@ func _jugar() -> void:
 		estado = Estado.JUGANDO
 		jugador.desbloquear()
 	get_tree().paused = false
+	calor.activo = estado == Estado.JUGANDO
 	interfaz.cerrar_menu()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func _menu(nuevo: Estado) -> void:
 	estado = nuevo
+	calor.activo = false
 	interfaz.mostrar_menu(Estado.keys()[nuevo])
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	get_tree().paused = true
@@ -75,10 +86,10 @@ func _alternar_pausa() -> void:
 
 func _tocar_lava(body: Node3D) -> void:
 	if body == jugador:
-		_morir()
+		jugador.salud.vaciar("lava")
 
 
-func _morir() -> void:
+func _morir(causa: String = "") -> void:
 	if estado != Estado.JUGANDO and estado != Estado.ENTREGA:
 		return
 	if tween_entrega:
@@ -86,6 +97,7 @@ func _morir() -> void:
 	jugador.bloquear()
 	jugador.reproducir_muerte()
 	_establecer_orbe("origen")
+	interfaz.causa_derrota = causa
 	_menu(Estado.DERROTA)
 
 
@@ -111,12 +123,15 @@ func _interactuar(altar: Node3D, actor: CharacterBody3D) -> void:
 		_establecer_orbe("espalda")
 		jugador.play_grab()
 		jugador.reproducir_orbe()
+		# El orbe es la gran recompensa a mitad del recorrido: restaura toda la salud.
+		jugador.salud.llenar()
 	elif altar == destino and jugador.objeto_llevado != "" and not destino.completado:
 		_entregar()
 
 
 func _entregar() -> void:
 	estado = Estado.ENTREGA
+	calor.activo = false
 	entrega_desde = jugador.posicion_orbe()
 	entrega_hasta = destino.orbe.global_position
 	jugador.bloquear()
@@ -144,6 +159,13 @@ func _terminar_entrega() -> void:
 	tween_entrega.tween_callback(func():
 		jugador.atenuar_entrega()
 		_menu(Estado.VICTORIA))
+
+
+func _volver_al_vestibulo() -> void:
+	# Volver desde un menú cuenta como abandonar el intento: el orbe no se lleva.
+	get_tree().set_meta(ORBE_LLEVADO, false)
+	get_tree().paused = false
+	get_tree().change_scene_to_file.call_deferred(VESTIBULO)
 
 
 func reiniciar() -> void:

@@ -2,6 +2,7 @@ extends "res://tests/test_partida.gd"
 
 
 func _ejecutar() -> void:
+	calor_activo = false
 	await cargar()
 	await recoger()
 	for i in range(1, 25):

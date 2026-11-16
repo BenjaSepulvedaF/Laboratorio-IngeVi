@@ -52,6 +52,7 @@ var borde_agarrado: Node3D = null
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var visual = $Visual
 @onready var colision: CollisionShape3D = $CollisionShape3D
+@onready var salud: Salud = $Salud
 @onready var sonido_salto: AudioStreamPlayer = $Sonidos/Salto
 @onready var sonido_aterrizaje: AudioStreamPlayer = $Sonidos/Aterrizaje
 @onready var sonido_agarre: AudioStreamPlayer = $Sonidos/Agarre

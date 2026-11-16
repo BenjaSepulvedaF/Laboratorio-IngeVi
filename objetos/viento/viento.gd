@@ -17,6 +17,7 @@ var tween_sonido: Tween
 
 
 func _ready() -> void:
+	add_to_group("zonas_viento")
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	_crear_particulas()

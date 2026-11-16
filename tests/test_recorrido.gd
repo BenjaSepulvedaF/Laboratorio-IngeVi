@@ -103,6 +103,7 @@ func saltar_entre(desde: PhysicsBody3D, hasta: PhysicsBody3D, preparar: bool = t
 
 
 func _ejecutar() -> void:
+	calor_activo = false
 	await cargar()
 	var apoyos: Array[PhysicsBody3D] = [mundo.get_node("IslaInicial")]
 	for i in range(1, 25):
