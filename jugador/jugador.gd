@@ -18,6 +18,13 @@ const COYOTE_TIME := 0.12
 const JUMP_BUFFER_TIME := 0.12
 const DURACION_ESCALADA := 0.6
 const BLOQUEO_REAGARRE := 0.4
+# Al bajarse caminando de una plataforma HACIA OTRA que está justo debajo (por
+# ejemplo, los pisos de la torre), durante este tiempo no se puede agarrar el
+# borde que acaba de dejar: si no, quedaría colgado en vez de bajar.
+# Si debajo hay lava, el agarre sigue funcionando: salirse de un borde por error
+# y agarrarse de él es lo que salva al jugador.
+const BLOQUEO_BAJADA := 0.6
+const ALCANCE_BAJADA := 3.0
 const RADIO_CUERPO := 0.36
 const ALTURA_MEDIA := 1.0
 const MASCARA_BORDES := 2
@@ -35,6 +42,8 @@ var viento_restante := 0.0
 var velocidad_viento := Vector3.ZERO
 var was_on_floor := true
 var bloqueo_agarre := 0.0
+var suelo_reciente: Object = null
+var bloqueo_bajada := 0.0
 var progreso_escalada := 0.0
 var punto_colgado := Vector3.ZERO
 var punto_elevado := Vector3.ZERO
@@ -78,6 +87,7 @@ func _ready() -> void:
 # el movimiento no depende del framerate.
 func _physics_process(delta: float) -> void:
 	bloqueo_agarre = maxf(0.0, bloqueo_agarre - delta)
+	bloqueo_bajada = maxf(0.0, bloqueo_bajada - delta)
 	match estado:
 		Estado.NORMAL:
 			_mover_normal(delta)
@@ -147,8 +157,14 @@ func _mover_normal(delta: float) -> void:
 	velocity += velocidad_viento
 	# Se guarda antes de moverse: al tocar el suelo, move_and_slide() anula velocity.y.
 	velocidad_caida = -velocity.y
+	var estaba_en_suelo := is_on_floor()
 	# move_and_slide() usa velocity en m/s y ya aplica el desplazamiento de este tick.
 	move_and_slide()
+	if is_on_floor():
+		suelo_reciente = _cuerpo_bajo_los_pies()
+	elif estaba_en_suelo and velocity.y <= 0.0 and _hay_suelo_debajo():
+		# Dejó el suelo sin saltar, bajando hacia otra plataforma.
+		bloqueo_bajada = BLOQUEO_BAJADA
 	if not is_on_floor() and velocity.y <= 0.0 and bloqueo_agarre <= 0.0:
 		_buscar_borde()
 
@@ -195,6 +211,8 @@ func _buscar_borde() -> void:
 			continue
 		if not pared.collider.is_in_group("agarrable"):
 			continue
+		if bloqueo_bajada > 0.0 and pared.collider == suelo_reciente:
+			continue
 		var normal: Vector3 = pared.normal
 		# Alejar la muestra de la esquina evita rayos justo en el límite de dos
 		# caras. El desplazamiento tangencial también deja apoyo para las manos.
@@ -229,6 +247,21 @@ func _buscar_borde() -> void:
 		agarre_cambiado.emit(true)
 		_reproducir(sonido_agarre)
 		return
+
+
+func _hay_suelo_debajo() -> bool:
+	var desde := global_position
+	var consulta := PhysicsRayQueryParameters3D.create(desde, desde + Vector3.DOWN * (ALTURA_MEDIA + ALCANCE_BAJADA), 1, [get_rid()])
+	var choque := get_world_3d().direct_space_state.intersect_ray(consulta)
+	return not choque.is_empty() and choque.collider != suelo_reciente
+
+
+func _cuerpo_bajo_los_pies() -> Object:
+	for i in get_slide_collision_count():
+		var choque := get_slide_collision(i)
+		if choque.get_normal().y > 0.7:
+			return choque.get_collider()
+	return suelo_reciente
 
 
 func _rayo(desde: Vector3, hasta: Vector3) -> PhysicsRayQueryParameters3D:

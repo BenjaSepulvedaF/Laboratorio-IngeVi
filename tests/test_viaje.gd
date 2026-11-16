@@ -7,12 +7,14 @@ func _ejecutar() -> void:
 	seed(22062026)
 	await cargar()
 	await pasos(8)
-	var apoyos: Array[PhysicsBody3D] = [mundo.get_node("IslaInicial")]
-	for i in range(1, 25):
-		apoyos.append(mundo.get_node("Parkour/Apoyo%02d" % i))
+	var apoyos := ruta_completa()
 	for regreso in [false, true]:
 		if regreso:
-			comprobar(await caminar_hasta(mundo.origen.global_position + Vector3(1.35, 0, 0.7)), "Aproximación al altar final")
+			# El pedestal ocupa el centro de la cima: se espera al orbe por el lado
+			# de la bajada (como haría una persona) para no tener que rodearlo.
+			var bajada: Vector3 = apoyos[apoyos.size() - 2].global_position - mundo.origen.global_position
+			bajada.y = 0
+			comprobar(await caminar_hasta(mundo.origen.global_position + bajada.normalized() * 1.35), "Aproximación al altar final")
 			await pasos(5)
 			await tecla(KEY_E)
 			comprobar(jugador.objeto_llevado != "", "Recogida durante viaje continuo")

@@ -5,7 +5,7 @@ func _ejecutar() -> void:
 	calor_activo = false
 	await cargar()
 	await recoger()
-	for i in range(1, 25):
+	for i in range(1, 33):
 		var apoyo = mundo.get_node("Parkour/Apoyo%02d" % i)
 		for direccion in [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK]:
 			# Las plataformas inestables caen al agarrarlas; aquí solo se revisan sus

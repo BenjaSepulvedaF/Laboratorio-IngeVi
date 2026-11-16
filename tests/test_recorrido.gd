@@ -41,8 +41,8 @@ func saltar_entre(desde: PhysicsBody3D, hasta: PhysicsBody3D, preparar: bool = t
 	var forma: BoxShape3D = desde.get_node("CollisionShape3D").shape
 	var objetivo_forma: BoxShape3D = hasta.get_node("CollisionShape3D").shape
 	var centro_destino: Vector3 = hasta.global_position
-	if hasta.name == "Apoyo24":
-		centro_destino.x += 1.3 # El pedestal ocupa el centro de este apoyo.
+	if hasta.name == "Torre5":
+		centro_destino.x += 1.3 # El pedestal ocupa el centro de la cima.
 	var direccion: Vector3 = centro_destino - desde.global_position
 	direccion.y = 0
 	direccion = direccion.normalized()
@@ -102,12 +102,20 @@ func saltar_entre(desde: PhysicsBody3D, hasta: PhysicsBody3D, preparar: bool = t
 	return termino and sobre_destino and altura_correcta
 
 
+# Isla inicial, Apoyo01-32 y los pisos de la torre, en orden de ida.
+func ruta_completa() -> Array[PhysicsBody3D]:
+	var ruta: Array[PhysicsBody3D] = [mundo.get_node("IslaInicial")]
+	for i in range(1, 33):
+		ruta.append(mundo.get_node("Parkour/Apoyo%02d" % i))
+	for piso in mundo.get_node("Parkour").torre:
+		ruta.append(piso)
+	return ruta
+
+
 func _ejecutar() -> void:
 	calor_activo = false
 	await cargar()
-	var apoyos: Array[PhysicsBody3D] = [mundo.get_node("IslaInicial")]
-	for i in range(1, 25):
-		apoyos.append(mundo.get_node("Parkour/Apoyo%02d" % i))
+	var apoyos := ruta_completa()
 	for regreso in [false, true]:
 		if regreso:
 			apoyos.reverse()
@@ -115,9 +123,9 @@ func _ejecutar() -> void:
 			if paused:
 				await cargar()
 				# La recarga reemplaza las referencias de los cuerpos del circuito.
-				for j in range(apoyos.size()):
-					var indice := 24 - j if regreso else j
-					apoyos[j] = mundo.get_node("IslaInicial") if indice == 0 else mundo.get_node("Parkour/Apoyo%02d" % indice)
+				apoyos = ruta_completa()
+				if regreso:
+					apoyos.reverse()
 			var nombre := "%s -> %s" % [apoyos[i].name, apoyos[i + 1].name]
 			comprobar(await saltar_entre(apoyos[i], apoyos[i + 1]), "Salto " + nombre)
 	print("RECORRIDO: %d saltos de ida/vuelta; %d fallos" % [comprobaciones, fallos])

@@ -10,6 +10,7 @@ var estado: Estado = Estado.INICIO
 var estado_antes_pausa: Estado = Estado.JUGANDO
 var tween_entrega: Tween
 var orbe_transito: Node3D
+var cristales_recogidos := 0
 var entrega_desde := Vector3.ZERO
 var entrega_hasta := Vector3.ZERO
 @onready var jugador = $Jugador
@@ -32,6 +33,12 @@ func _ready() -> void:
 	jugador.caida.connect(func(): jugador.salud.vaciar("caida"))
 	jugador.salud.agotada.connect(_morir)
 	calor.salud = jugador.salud
+	calor.jugador = jugador
+	# Los cristales los crea el generador del parkour (que ya corrió su _ready).
+	var cristales := get_tree().get_nodes_in_group("cristales")
+	interfaz.mostrar_cristales(0, cristales.size())
+	for cristal in cristales:
+		cristal.recogido.connect(_on_cristal_recogido.bind(cristales.size()))
 	interfaz.conectar_salud(jugador.salud)
 	jugador.agarre_cambiado.connect(interfaz.mostrar_agarre)
 	$Lava/ZonaLetal.body_entered.connect(_tocar_lava)
@@ -82,6 +89,11 @@ func _alternar_pausa() -> void:
 		interfaz.reproducir_pausa()
 		estado_antes_pausa = estado
 		_menu(Estado.PAUSA)
+
+
+func _on_cristal_recogido(_cristal: Node, total: int) -> void:
+	cristales_recogidos += 1
+	interfaz.mostrar_cristales(cristales_recogidos, total)
 
 
 func _tocar_lava(body: Node3D) -> void:

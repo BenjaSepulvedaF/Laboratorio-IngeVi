@@ -4,15 +4,19 @@ extends Node
 # constante. Obliga a avanzar: no basta con no caerse, hay que ir rápido.
 # En las zonas de viento quema más (el viento arrastra aire ardiente), así que
 # quedarse agachado esperando a que pasen las ráfagas tiene un costo.
+# Agachado también quema más: el jugador está más cerca de la lava.
+# Los multiplicadores se combinan: agachado dentro del viento quema x3.
 # Lo enciende y apaga partida.gd: solo quema en el estado JUGANDO.
 
 # Segundos que dura la barra llena sin recuperarse. Es el valor que más
 # cambia la dificultad: ajustarlo jugando.
-@export var segundos_de_resistencia := 90.0
+@export var segundos_de_resistencia := 75.0
 @export var multiplicador_viento := 2.0
+@export var multiplicador_agachado := 1.5
 
 var activo := false
 var salud: Salud
+var jugador: CharacterBody3D
 
 
 func _physics_process(delta: float) -> void:
@@ -21,6 +25,8 @@ func _physics_process(delta: float) -> void:
 	var por_segundo := salud.maximo / segundos_de_resistencia
 	if _en_zona_de_viento():
 		por_segundo *= multiplicador_viento
+	if jugador and jugador.agachado:
+		por_segundo *= multiplicador_agachado
 	# Daño en unidades por segundo, multiplicado por delta: quema lo mismo a
 	# cualquier tasa de fotogramas.
 	salud.danar(por_segundo * delta, "calor")

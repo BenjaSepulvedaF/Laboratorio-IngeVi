@@ -19,6 +19,8 @@ var ayuda_controles: Label
 var hud: MarginContainer
 var menu_actual := "INICIO"
 var barra_salud: BarraSalud
+var contador_cristales: Label
+var tween_cristales: Tween
 var boton_vestibulo: Button
 var tween_fondo: Tween
 # La fija partida.gd antes de mostrar la derrota: "calor", "lava" o "caida".
@@ -76,6 +78,9 @@ func _construir() -> void:
 	columna.add_child(objetivo)
 	barra_salud = BarraSalud.new()
 	columna.add_child(barra_salud)
+	contador_cristales = _texto("", 16, Color(0.55, 0.9, 1.0))
+	contador_cristales.visible = false
+	columna.add_child(contador_cristales)
 	var espacio := Control.new()
 	espacio.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	espacio.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -145,6 +150,23 @@ func _actualizar_ayudas() -> void:
 	ayuda_controles.text = Dispositivo.texto(
 		"WASD / Flechas: mover   ·   Espacio: saltar   ·   Shift: agacharse   ·   E: interactuar   ·   V: cámara   ·   Esc: pausa",
 		"Stick izq.: mover   ·   Stick der.: cámara   ·   A: saltar   ·   B: agacharse   ·   X: interactuar   ·   Y: vista   ·   Start: pausa")
+
+
+# La llama partida.gd cada vez que se recoge un cristal (no se consulta por frame).
+func mostrar_cristales(recogidos: int, total: int) -> void:
+	contador_cristales.visible = total > 0
+	contador_cristales.text = "◆ Cristales de agua: %d / %d" % [recogidos, total]
+	if recogidos == 0:
+		return
+	# Feedback: el contador crece y brilla un instante al sumar uno.
+	if tween_cristales:
+		tween_cristales.kill()
+	contador_cristales.pivot_offset = contador_cristales.size * Vector2(0.0, 0.5)
+	contador_cristales.scale = Vector2.ONE * 1.35
+	contador_cristales.modulate = Color(1.6, 1.6, 1.6)
+	tween_cristales = create_tween().set_parallel()
+	tween_cristales.tween_property(contador_cristales, "scale", Vector2.ONE, 0.4).set_trans(Tween.TRANS_BACK)
+	tween_cristales.tween_property(contador_cristales, "modulate", Color.WHITE, 0.4)
 
 
 func conectar_salud(salud: Salud) -> void:

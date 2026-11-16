@@ -4,11 +4,12 @@ extends Node3D
 # Geometría decorativa determinista, visible también dentro del editor.
 # No tiene colisiones: únicamente los apoyos del circuito son transitables.
 
-# El circuito aleatorio llega como máximo hasta z ≈ -123 (medido en 300 mapas) y la
-# base del volcán mide hasta ~40 m de radio. Con el centro en -172 queda un margen
-# de ~9 m para que ni el jugador ni la cámara terminen dentro de la montaña.
+# El circuito aleatorio (con el sector 4 y la torre del orbe) llega como máximo
+# hasta z ≈ -165 (medido en 300 mapas) y la base del volcán mide hasta ~40 m de
+# radio. Con el centro en -216 queda un margen de ~11 m para que ni el jugador ni
+# la cámara terminen dentro de la montaña.
 # Si se alarga el circuito o se agranda el volcán, hay que alejarlo de nuevo.
-const Z_VOLCAN := -172.0
+const Z_VOLCAN := -216.0
 
 
 func _ready() -> void:
@@ -118,14 +119,15 @@ func _malla(padre: Node3D, mesh: Mesh, material: Material, posicion: Vector3) ->
 func _particulas(padre: Node3D, ceniza: bool) -> void:
 	var particulas := GPUParticles3D.new()
 	particulas.name = "Ceniza" if ceniza else "Ascuas"
-	particulas.amount = 100 if ceniza else 70
+	particulas.amount = 160 if ceniza else 110
 	particulas.lifetime = 9.0
 	particulas.preprocess = 3.0
-	particulas.position = Vector3(0, 7 if ceniza else 1, -44)
-	particulas.visibility_aabb = AABB(Vector3(-25, -15, -65), Vector3(50, 45, 130))
+	# Cubre todo el circuito, de la isla inicial (z ≈ 8) a la torre (z ≈ -165).
+	particulas.position = Vector3(0, 7 if ceniza else 1, -78)
+	particulas.visibility_aabb = AABB(Vector3(-25, -15, -100), Vector3(50, 50, 200))
 	var proceso := ParticleProcessMaterial.new()
 	proceso.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	proceso.emission_box_extents = Vector3(18, 5 if ceniza else 0.5, 50)
+	proceso.emission_box_extents = Vector3(18, 5 if ceniza else 0.5, 88)
 	proceso.direction = Vector3(0.3, -1 if ceniza else 1, 0.1)
 	proceso.spread = 25
 	proceso.initial_velocity_min = 0.3

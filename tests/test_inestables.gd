@@ -20,8 +20,9 @@ func _ejecutar() -> void:
 	# Sin viento: las ráfagas podrían sacar al jugador de la plataforma durante la prueba.
 	for zona in ["ZonaViento1", "ZonaViento2", "ZonaViento3"]:
 		mundo.get_node("Parkour/" + zona).aceleracion = 0.0
-	var inestables := get_nodes_in_group("inestables")
-	comprobar(inestables.size() == 3, "Hay tres plataformas inestables")
+	# Las del camino principal; los desvíos pueden sumar otra.
+	var inestables := get_nodes_in_group("inestables").filter(func(p): return p.name.begins_with("Apoyo"))
+	comprobar(inestables.size() == 5, "Hay cinco plataformas inestables en el camino (3 con viento, 2 en el clímax)")
 	for p in inestables:
 		comprobar(p is RigidBody3D and p.freeze, p.name + " es un RigidBody3D congelado al inicio")
 

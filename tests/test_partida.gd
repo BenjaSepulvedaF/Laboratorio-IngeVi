@@ -39,13 +39,15 @@ func tecla(codigo: Key) -> void:
 	await pasos(1)
 
 
-func cargar(inicio_directo: bool = true) -> void:
+func cargar(inicio_directo: bool = true, semilla: int = -1) -> void:
 	paused = false
 	if is_instance_valid(current_scene):
 		current_scene.free()
 	if inicio_directo:
 		set_meta("volcan_inicio_directo", true)
 	mundo = load("res://niveles/mundo/mundo.tscn").instantiate()
+	if semilla >= 0:
+		mundo.get_node("Parkour").semilla = semilla
 	root.add_child(mundo)
 	current_scene = mundo
 	jugador = mundo.jugador
@@ -82,7 +84,7 @@ func _ejecutar() -> void:
 	mundo.interfaz.boton_principal.pressed.emit()
 	await pasos(20)
 	comprobar(jugador.is_on_floor() and jugador.position.y > 3.9, "La isla inicial es segura")
-	comprobar(get_nodes_in_group("apoyos").size() == 24, "Hay 24 apoyos")
+	comprobar(get_nodes_in_group("apoyos").size() == 32, "Hay 32 apoyos")
 	var posicion: Vector3 = jugador.position
 	await tecla(KEY_ESCAPE)
 	await pasos(10)

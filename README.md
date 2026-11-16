@@ -36,11 +36,24 @@ El repositorio cuenta con un archivo `.gitignore` configurado adecuadamente para
 
 ## Objetivo y controles
 
-Cruza los tres sectores del circuito, recoge el Orbe Sagrado del altar final y devuélvelo al altar de la isla inicial. Hay 24 apoyos y tres zonas de viento. La lava es letal: al caer aparece **Has caído**, el orbe vuelve a su pedestal y **Reintentar** comienza una partida nueva desde el inicio.
+Cruza los cuatro sectores del circuito, sube la torre del orbe, recoge el Orbe Sagrado de su cima y devuélvelo al altar de la isla inicial. La lava es letal.
+
+**Recorrido y curva de dificultad** (32 apoyos y una torre):
+
+1. **Sector 1** (Apoyo01-08): saltos cortos para aprender.
+2. **Sector 2** (Apoyo09-16): saltos más largos, viento y la primera plataforma inestable.
+3. **Sector 3** (Apoyo17-24): saltos largos, más giros y viento.
+4. **Descanso** (Apoyo25): una plataforma amplia, sin viento y con un cristal de agua. Es el respiro antes del clímax.
+5. **Sector 4, el clímax** (Apoyo26-32): plataformas más pequeñas que exigen precisión, los saltos más largos y dos plataformas inestables.
+6. **Torre del orbe:** 5 pisos en espiral, cada uno 2.3 m más alto que el anterior. Es demasiado para saltar, así que se sube **colgándose del borde** del piso siguiente y escalando. El orbe está en la cima.
+
+Las tres zonas de viento están en los sectores 2 y 3. La lava es letal: al caer aparece **Has caído**, el orbe vuelve a su pedestal y **Reintentar** comienza una partida nueva desde el inicio.
 
 **Mecánica principal:** el salto entre plataformas sobre la lava, con agarre de bordes. La complican las ráfagas de viento (que se resisten agachándose) y las plataformas inestables.
 
-**Calor (sistema de salud):** la barra **CALOR** del HUD es tu resistencia. En el volcán baja sola (la barra llena dura 90 s) y el doble de rápido dentro de las zonas de viento. Recoger el orbe la llena. Si llega a cero aparece **El calor te venció**; caer a la lava la vacía de golpe. Con poca resistencia la barra late en rojo, y al recuperarse destella en celeste. Las pantallas de derrota, pausa y victoria ofrecen **Volver al vestíbulo**.
+**Calor (sistema de salud):** la barra **CALOR** del HUD es tu resistencia. En el volcán baja sola: la barra llena dura 75 s. Baja el doble de rápido dentro de las zonas de viento y ×1.5 agachado, porque estás más cerca de la lava (agachado en el viento: ×3). Recoger el orbe la llena. Si llega a cero aparece **El calor te venció**; caer a la lava la vacía de golpe. Con poca resistencia la barra late en rojo, y al recuperarse destella en celeste. Las pantallas de derrota, pausa y victoria ofrecen **Volver al vestíbulo**.
+
+**Desvíos y cristales de agua:** de cada sector sale un desvío, un callejón sin salida más difícil que el camino principal: saltos más largos en el sector 1, una plataforma final inestable en el 2 y tres saltos en subida en el 3. Al final de cada uno hay un **cristal de agua** azul que recupera el 40 % de la barra. Los cristales **no se recargan**: si los gastas todos a la ida, a la vuelta no quedan. El cuarto cristal está en la plataforma de descanso, sobre el camino. El HUD cuenta los recogidos (**Cristales de agua: N / 4**).
 
 **Plataformas inestables:** los tres apoyos bajo las zonas de viento tienen grietas incandescentes. Al pisarlos o colgarse de ellos tiemblan durante 1.5 s, con las grietas cada vez más brillantes y un crujido, y luego se desploman a la lava. Unos 3.5 s después reaparecen en su sitio, así que el regreso con el orbe sigue siendo posible. Agacharse protege del viento, pero no del derrumbe: el jugador no puede quedarse quieto.
 
@@ -61,7 +74,7 @@ El juego se controla con **teclado y ratón** o con **mando** (probado con la di
 
 En los menús se navega con flechas o con la cruceta, y se confirma con Enter o con A. Los textos en pantalla (altares, ayuda al colgarse, barra de controles) muestran los botones del último dispositivo usado; lo detecta el autoload `Dispositivo` (`ui/dispositivo.gd`).
 
-El agarre de bordes es automático al caer junto a una plataforma y no tiene límite de tiempo. Solo funcionan los bordes del circuito y de la isla inicial. Un techo u otro obstáculo que bloquee la subida impide escalar. Al soltarse hay una breve tolerancia para no volver a agarrarse inmediatamente.
+El agarre de bordes es automático al caer junto a una plataforma y no tiene límite de tiempo. Al bajarse caminando hacia otra plataforma que está justo debajo (como en la torre), no se agarra del borde que acaba de dejar; si debajo hay lava, sí se agarra. Solo funcionan los bordes del circuito y de la isla inicial. Un techo u otro obstáculo que bloquee la subida impide escalar. Al soltarse hay una breve tolerancia para no volver a agarrarse inmediatamente.
 
 El orbe flota en la espalda mientras se transporta. En primera persona se oculta con el cuerpo. Al entregarlo, viaja al altar mediante una animación; después aparece **Orbe colocado** y **Reiniciar escenario**.
 
@@ -79,7 +92,8 @@ El proyecto se organiza **por funcionalidad**: cada pieza del juego tiene su pro
 │   ├── puerta/     Portales entre niveles
 │   ├── altar/      Altares (interacción por proximidad)
 │   ├── viento/     Zonas de viento
-│   └── plataforma_inestable/  Apoyos RigidBody3D que se derrumban
+│   ├── plataforma_inestable/  Apoyos RigidBody3D que se derrumban
+│   └── cristal/    Cristales de agua que recuperan resistencia
 ├── ui/             Menús e instrucciones
 ├── audio/          Música de fondo (autoload) y SonidoSuelto: sonidos que sobreviven a cambios de escena
 ├── assets/
@@ -92,7 +106,7 @@ El proyecto se organiza **por funcionalidad**: cada pieza del juego tiene su pro
 - `jugador/jugador.gd` controla movimiento, salto, viento, cámaras y los estados normal, colgado, escalando y bloqueado.
 - `jugador/personaje.gd` construye y anima el personaje articulado; `objetos/orbe/orbe.tscn` y `orbe.gd` comparten el aspecto y la animación del orbe.
 - `niveles/mundo/mundo.tscn` contiene los apoyos y sus colisiones editables. `paisaje.gd` construye decoración determinista y `lava.gdshader` anima la lava.
-- `niveles/mundo/parkour_generador.gd` coloca los apoyos del parkour de forma aleatoria al entrar al nivel. Cada apoyo queda al alcance del anterior y la dificultad sube por sector. Los parámetros de distancia, altura y giro están en el script; `semilla` fija un mapa concreto.
+- `niveles/mundo/parkour_generador.gd` coloca los apoyos del parkour de forma aleatoria al entrar al nivel. Cada apoyo queda al alcance del anterior y la dificultad sube por sector. Los parámetros de distancia, altura y giro están en el script; `semilla` fija un mapa concreto. Apoyo01-24 están en `mundo.tscn`; el descanso, el sector 4 (Apoyo25-32) y la torre se crean por código copiando apoyos existentes. También genera los tres desvíos (lista `desvios`): si uno no cabe desde su apoyo, lo intenta desde los vecinos, y nunca invade la decoración. El volcán decorativo (`Z_VOLCAN` en `paisaje.gd`) está calculado para que el circuito más largo no lo toque.
 - `objetos/plataforma_inestable/plataforma_inestable.gd` es un `RigidBody3D` congelado (`freeze`) mientras está estable. Al derrumbarse se descongela y su caída la calcula el motor de física (Jolt). Apoyo12, Apoyo16 y Apoyo21 en `mundo.tscn` usan este script. Si se agregan `assets/audio/crujido.wav` y `derrumbe.wav` (también .mp3 / .ogg), se usan automáticamente.
 - `jugador/salud.gd` (`Salud`) es un componente reutilizable: lleva la salud y avisa con las señales `cambiada` y `agotada`. No sabe qué causa el daño. En el volcán lo quema `niveles/mundo/calor.gd`, y `ui/barra_salud.gd` lo muestra en el HUD conectándose a esas señales (patrón Observer, sin consultar la salud cada frame).
 - `objetos/altar/altar.gd` comunica interacciones por proximidad; `ui/interfaz.gd` presenta los menús y las instrucciones.
@@ -113,6 +127,7 @@ godot --headless --path . --script res://tests/test_recorrido.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_viaje.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_inestables.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_salud.gd --fixed-fps 120
+godot --headless --path . --script res://tests/test_cristales.gd --fixed-fps 120
 ```
 
 Las pruebas cubren transferencias del orbe, lava, reintentos, cámaras, pausa, entrega y victoria; caras y esquinas agarrables, obstrucciones, soltarse y ausencia de límite de tiempo; los 48 saltos individuales de ida/vuelta; y un viaje continuo desde la aparición hasta la victoria, con viento activo. En la prueba continua el jugador usa las acciones de movimiento y salto, sin teletransportes ni cambios artificiales de velocidad. `test_inestables` comprueba el temblor, la caída por física, la reaparición, el derrumbe estando colgado y las acciones con mando (botones y sticks).
