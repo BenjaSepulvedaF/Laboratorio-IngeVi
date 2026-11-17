@@ -187,7 +187,7 @@ func mostrar_menu(estado: String) -> void:
 	match estado:
 		"INICIO":
 			titulo.text = "El corazón del volcán"
-			descripcion.text = "Cruza la lava, recupera el orbe\ny devuélvelo al altar de origen.\n\nEl calor consume tu resistencia: no te detengas.\nSi caes o te quemas, empiezas de nuevo."
+			descripcion.text = "Cruza la lava, recupera el orbe\ny llévalo al monumento del vestíbulo.\n\nEl calor consume tu resistencia: no te detengas.\nSi caes o te quemas, empiezas de nuevo."
 			boton_principal.text = "Jugar"
 		"PAUSA":
 			titulo.text = "Pausa"
@@ -203,8 +203,8 @@ func mostrar_menu(estado: String) -> void:
 			boton_principal.text = "Reintentar"
 		"VICTORIA":
 			titulo.text = "Orbe colocado"
-			descripcion.text = "Has recuperado el corazón del volcán.\nRecorrido completado."
-			boton_principal.text = "Reiniciar escenario"
+			descripcion.text = "El monumento vuelve a arder:\nhas recuperado el corazón del volcán."
+			boton_principal.text = "Jugar de nuevo"
 			sonido_victoria.play()
 	boton_principal.grab_focus()
 
@@ -218,11 +218,13 @@ func cerrar_menu() -> void:
 func mostrar_objetivo(lugar: String) -> void:
 	match lugar:
 		"espalda":
-			objetivo.text = "Orbe recuperado · Regresa al altar de origen."
-		"transito":
-			objetivo.text = "Colocando el orbe…"
-		"destino":
-			objetivo.text = "Orbe colocado · Recorrido completado."
+			objetivo.text = "Orbe recuperado · Vuelve al portal Inicio y llévalo al monumento."
+		"monumento":
+			objetivo.text = "Coloca el orbe en su pedestal del monumento."
+		"portal_abierto":
+			objetivo.text = "Orbe colocado · Se abrió un nuevo portal."
+		"entregado":
+			objetivo.text = "Ya colocaste este orbe en el monumento."
 		"vestibulo":
 			objetivo.text = "Cruza el portal Parkour para entrar al volcán."
 		_:

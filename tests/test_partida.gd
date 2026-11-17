@@ -105,7 +105,7 @@ func _ejecutar() -> void:
 	await pasos(35)
 	comprobar(mundo.estado == mundo.Estado.DERROTA and paused, "La lava muestra derrota")
 	comprobar(jugador.objeto_llevado == "" and mundo.origen.orbe.visible, "Morir devuelve el orbe al origen")
-	comprobar(not jugador.visual.orbe_espalda.visible and not mundo.destino.orbe.visible, "No hay copias del orbe tras morir")
+	comprobar(not jugador.visual.orbe_espalda.visible, "No hay copias del orbe tras morir")
 
 	for intento in range(3):
 		mundo.interfaz.boton_principal.pressed.emit()
@@ -183,30 +183,12 @@ func _ejecutar() -> void:
 	Input.action_release("saltar")
 	comprobar(jugador.is_on_floor() and jugador.objeto_llevado != "", "Subir conserva el orbe")
 
-	jugador.global_position = mundo.destino.global_position + Vector3(0, 1.025, -1.5)
-	jugador.velocity = Vector3.ZERO
-	await pasos(5)
-	await tecla(KEY_E)
-	comprobar(mundo.estado == mundo.Estado.ENTREGA, "E inicia la entrega")
-	comprobar(mundo.interfaz.objetivo.text == "Colocando el orbe…", "Objetivo durante la animación de entrega")
-	comprobar(mundo.orbe_transito.visible and not jugador.visual.orbe_espalda.visible and not mundo.destino.orbe.visible, "Un solo orbe durante la entrega")
-	await tecla(KEY_E)
-	await pasos(10)
-	await tecla(KEY_ESCAPE)
-	posicion = mundo.orbe_transito.position
-	await pasos(20)
-	comprobar(mundo.orbe_transito.position.is_equal_approx(posicion), "Pausa congela entrega")
-	await tecla(KEY_ESCAPE)
-	await pasos(100)
-	comprobar(mundo.estado == mundo.Estado.VICTORIA and paused, "Entrega termina en victoria")
-	comprobar(mundo.destino.completado and mundo.destino.orbe.visible and not mundo.origen.orbe.visible, "Orbe colocado sin duplicación")
-	comprobar(mundo.interfaz.titulo.text == "Orbe colocado" and mundo.interfaz.boton_principal.text == "Reiniciar escenario", "Texto y botón de victoria")
-	mundo.interfaz.boton_principal.pressed.emit()
-	await pasos(5)
-	mundo = current_scene
-	jugador = mundo.jugador
-	comprobar(mundo.estado == mundo.Estado.JUGANDO and mundo.origen.orbe.visible and not mundo.destino.completado, "Reinicio desde victoria")
-
 	print("RESULTADO: %d comprobaciones; %d fallos" % [comprobaciones, fallos])
 	paused = false
 	quit(1 if fallos else 0)
+
+
+# Los scripts de prueba se compilan antes de que existan los autoloads: se piden
+# al árbol en vez de nombrarlos directamente.
+func progreso() -> Node:
+	return root.get_node("Progreso")

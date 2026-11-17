@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://ckovd8dyv2gbe" path="res://assets/texturas/superficie/PavingStones138_1K-JPG_AmbientOcclusion.jpg" id="16_clara_ao"]
 [ext_resource type="Script" uid="uid://co4bk2o2kdacw" path="res://ui/interfaz.gd" id="17_interfaz"]
 [ext_resource type="PackedScene" path="res://jugador/jugador.tscn" id="jugador_escena"]
+[ext_resource type="Script" path="res://objetos/monumento/monumento.gd" id="18_monumento"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Cielo_material"]
 sky_top_color = Color(0.25, 0.4, 0.65, 1)
@@ -246,3 +247,8 @@ texto = "Parkour"
 
 [node name="Interfaz" type="CanvasLayer" parent="." unique_id=1611592429]
 script = ExtResource("17_interfaz")
+
+[node name="MonumentoOrbes" type="Node3D" parent="."]
+script = ExtResource("18_monumento")
+cristal_central = NodePath("../Cristal")
+luz_central = NodePath("../LuzCristal")

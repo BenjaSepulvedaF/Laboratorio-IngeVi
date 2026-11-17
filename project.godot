@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Musica="*res://audio/musica.gd"
 Dispositivo="*res://ui/dispositivo.gd"
+Progreso="*res://niveles/progreso.gd"
 
 [display]
 

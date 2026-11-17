@@ -30,11 +30,36 @@ func _ejecutar() -> void:
 				quit(1)
 				return
 			await pasos(3)
-	comprobar(await caminar_hasta(mundo.destino.global_position + Vector3(1.35, 0, -0.6)), "Regreso al altar inicial")
+	# Vuelta al vestíbulo por el portal "Inicio", caminando.
+	var portal: Vector3 = mundo.get_node("PuertaSpawn").global_position
+	var volcan = mundo
+	for frame in range(400):
+		if not is_instance_valid(volcan) or current_scene != volcan:
+			break
+		var hacia: Vector3 = portal - jugador.global_position
+		hacia.y = 0
+		dirigir((hacia * 4.0).limit_length(jugador.SPEED))
+		await pasos(1)
+	soltar_controles()
+	await pasos(10)
+	comprobar(current_scene.scene_file_path == "res://niveles/spawn/spawn.tscn", "El portal Inicio lleva al vestíbulo")
+	jugador = current_scene.jugador
+	comprobar(jugador.orbe_id == "volcan", "El orbe llega al vestíbulo")
+	# Hasta el pedestal del volcán en el monumento.
+	var pedestal: Node3D = current_scene.monumento.pedestales["volcan"].nodo
+	var junto: Vector3 = pedestal.global_position + (jugador.global_position - pedestal.global_position).normalized() * 1.2
+	for frame in range(400):
+		var hacia: Vector3 = junto - jugador.global_position
+		hacia.y = 0
+		if hacia.length() < 0.15:
+			break
+		dirigir((hacia * 4.0).limit_length(jugador.SPEED))
+		await pasos(1)
+	soltar_controles()
 	await pasos(5)
 	await tecla(KEY_E)
-	await pasos(100)
-	comprobar(mundo.estado == mundo.Estado.VICTORIA, "Victoria tras el viaje completo")
+	await pasos(150)
+	comprobar(progreso().entregado("volcan") and paused and current_scene.interfaz.menu_actual == "VICTORIA", "Victoria al colocar el orbe en el monumento")
 	print("VIAJE COMPLETO: %d comprobaciones; %d fallos" % [comprobaciones, fallos])
 	paused = false
 	quit(1 if fallos else 0)

@@ -36,7 +36,16 @@ El repositorio cuenta con un archivo `.gitignore` configurado adecuadamente para
 
 ## Objetivo y controles
 
-Cruza los cuatro sectores del circuito, sube la torre del orbe, recoge el Orbe Sagrado de su cima y devuélvelo al altar de la isla inicial. La lava es letal.
+### Cómo completar el nivel
+
+1. **Inicio:** en el vestíbulo, cruza el portal **Parkour**.
+2. Cruza los cuatro sectores, sube la **torre del orbe** y recoge el orbe de su cima con **E** (o **X** en mando).
+3. Vuelve por el mismo camino hasta la isla inicial y cruza el portal **Inicio**.
+4. **Final:** en el vestíbulo, coloca el orbe en su pedestal del **monumento** (E / X). Aparece **Orbe colocado**: es la victoria. **Jugar de nuevo** borra el progreso.
+
+La lava es letal y el calor gasta tu resistencia: si se acaba, el intento termina (**Reintentar** o **Volver al vestíbulo**).
+
+**Monumento de los orbes:** cada nivel guarda un orbe, y el monumento tiene un pedestal por nivel. Colocar un orbe desbloquea el portal del nivel siguiente; colocar el del último nivel es la victoria. Por ahora el volcán es el único nivel, así que su orbe da la victoria. El cristal central del monumento brilla más con cada orbe colocado.
 
 **Recorrido y curva de dificultad** (32 apoyos y una torre):
 
@@ -68,7 +77,7 @@ El juego se controla con **teclado y ratón** o con **mando** (probado con la di
 | `saltar` | Espacio | A | Saltar (mantener = más altura). Colgado: subir |
 | `mover_atras` (colgado) | S / flecha abajo | Stick abajo / cruceta abajo | Soltarse del borde |
 | `agacharse` | Shift (mantener) | B (mantener) | Aferrarse al suelo: inmune al viento y a cualquier empuje, sin poder moverse ni saltar |
-| `interactuar` | E | X | Recoger o entregar el orbe cerca del altar |
+| `interactuar` | E | X | Recoger el orbe de su altar o colocarlo en el monumento |
 | `cambiar_camara` | V | Y | Alternar primera y tercera persona |
 | `pausa` | Esc | Start | Pausar / continuar, en el volcán y en el vestíbulo |
 
@@ -76,7 +85,7 @@ En los menús se navega con flechas o con la cruceta, y se confirma con Enter o 
 
 El agarre de bordes es automático al caer junto a una plataforma y no tiene límite de tiempo. Al bajarse caminando hacia otra plataforma que está justo debajo (como en la torre), no se agarra del borde que acaba de dejar; si debajo hay lava, sí se agarra. Solo funcionan los bordes del circuito y de la isla inicial. Un techo u otro obstáculo que bloquee la subida impide escalar. Al soltarse hay una breve tolerancia para no volver a agarrarse inmediatamente.
 
-El orbe flota en la espalda mientras se transporta. En primera persona se oculta con el cuerpo. Al entregarlo, viaja al altar mediante una animación; después aparece **Orbe colocado** y **Reiniciar escenario**.
+El orbe flota en la espalda mientras se transporta, también al cruzar portales. En primera persona se oculta con el cuerpo. Al colocarlo en el monumento, viaja hasta su pedestal mediante una animación.
 
 ## Organización
 
@@ -90,7 +99,8 @@ El proyecto se organiza **por funcionalidad**: cada pieza del juego tiene su pro
 ├── objetos/
 │   ├── orbe/       Orbe Sagrado
 │   ├── puerta/     Portales entre niveles
-│   ├── altar/      Altares (interacción por proximidad)
+│   ├── altar/      Altar del orbe (interacción por proximidad)
+│   ├── monumento/  Monumento de los orbes del vestíbulo
 │   ├── viento/     Zonas de viento
 │   ├── plataforma_inestable/  Apoyos RigidBody3D que se derrumban
 │   └── cristal/    Cristales de agua que recuperan resistencia
@@ -102,7 +112,9 @@ El proyecto se organiza **por funcionalidad**: cada pieza del juego tiene su pro
 └── tests/          Pruebas automáticas
 ```
 
-- `niveles/mundo/partida.gd` coordina inicio, pausa, derrota, entrega y victoria. Es el único responsable de transferir el orbe entre pedestal, espalda y altar.
+- `niveles/progreso.gd` (autoload `Progreso`) tiene la lista de niveles en orden (`NIVELES`) y qué orbes se colocaron. **Para agregar un nivel:** sumarlo a `NIVELES`. El monumento crea su pedestal solo, y su portal en el vestíbulo debe tener `nivel_requerido` = id del nivel anterior para quedar sellado hasta entonces.
+- `niveles/spawn/spawn.gd` y `objetos/monumento/monumento.gd`: entrega de orbes y victoria en el vestíbulo.
+- `niveles/mundo/partida.gd` coordina inicio, pausa y derrota del volcán. Es el único responsable de dónde está su orbe: en el pedestal, en la espalda o ya entregado.
 - `jugador/jugador.gd` controla movimiento, salto, viento, cámaras y los estados normal, colgado, escalando y bloqueado.
 - `jugador/personaje.gd` construye y anima el personaje articulado; `objetos/orbe/orbe.tscn` y `orbe.gd` comparten el aspecto y la animación del orbe.
 - `niveles/mundo/mundo.tscn` contiene los apoyos y sus colisiones editables. `paisaje.gd` construye decoración determinista y `lava.gdshader` anima la lava.
@@ -128,8 +140,9 @@ godot --headless --path . --script res://tests/test_viaje.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_inestables.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_salud.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_cristales.gd --fixed-fps 120
+godot --headless --path . --script res://tests/test_monumento.gd --fixed-fps 120
 ```
 
-Las pruebas cubren transferencias del orbe, lava, reintentos, cámaras, pausa, entrega y victoria; caras y esquinas agarrables, obstrucciones, soltarse y ausencia de límite de tiempo; los 48 saltos individuales de ida/vuelta; y un viaje continuo desde la aparición hasta la victoria, con viento activo. En la prueba continua el jugador usa las acciones de movimiento y salto, sin teletransportes ni cambios artificiales de velocidad. `test_inestables` comprueba el temblor, la caída por física, la reaparición, el derrumbe estando colgado y las acciones con mando (botones y sticks).
+Las pruebas cubren transferencias del orbe, lava, reintentos, cámaras, pausa, entrega y victoria; caras y esquinas agarrables, obstrucciones, soltarse y ausencia de límite de tiempo; los 74 saltos individuales de ida/vuelta (incluida la torre); y un viaje continuo desde la aparición hasta la victoria en el monumento del vestíbulo, con viento y calor activos. En la prueba continua el jugador usa las acciones de movimiento y salto, sin teletransportes ni cambios artificiales de velocidad. `test_inestables` comprueba el temblor, la caída por física, la reaparición, el derrumbe estando colgado y las acciones con mando (botones y sticks). `test_monumento` comprueba el paso del orbe entre escenas, la entrega en el monumento, la victoria, jugar de nuevo y los portales sellados.
 
 `test_viaje` usa un mapa aleatorio y a veces falla porque el bot se demora en una plataforma inestable o falla un salto puntual. Si falla, vuelve a ejecutarla.

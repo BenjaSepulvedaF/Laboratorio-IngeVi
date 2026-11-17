@@ -36,6 +36,8 @@ var coyote_timer := 0.0
 var jump_buffer_timer := 0.0
 var first_person := false
 var objeto_llevado := ""
+# Nivel del orbe que lleva (por ejemplo "volcan"); "" si no lleva ninguno.
+var orbe_id := ""
 var grab_amount := 0.0
 var viento := Vector3.ZERO
 var viento_restante := 0.0
@@ -364,8 +366,9 @@ func puede_interactuar() -> bool:
 	return estado == Estado.NORMAL
 
 
-func equipar_orbe(equipado: bool) -> void:
+func equipar_orbe(equipado: bool, id := "volcan") -> void:
 	objeto_llevado = "Orbe Sagrado" if equipado else ""
+	orbe_id = id if equipado else ""
 	visual.orbe_espalda.visible = equipado
 
 

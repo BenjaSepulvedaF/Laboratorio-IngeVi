@@ -54,7 +54,7 @@ func _ejecutar() -> void:
 	comprobar(jugador.estado == jugador.Estado.NORMAL, "Un borde lejano no atrae al jugador")
 
 	# Un pedestal no pertenece a la máscara/grupo de superficies agarrables.
-	jugador.global_position = mundo.destino.global_position + Vector3(1, 0.1, 0)
+	jugador.global_position = mundo.origen.global_position + Vector3(1, 1.1, 0)
 	jugador.velocity = Vector3(0, -0.2, 0)
 	await pasos(3)
 	comprobar(jugador.estado == jugador.Estado.NORMAL, "El pedestal no es agarrable")
