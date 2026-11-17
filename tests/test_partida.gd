@@ -39,12 +39,16 @@ func tecla(codigo: Key) -> void:
 	await pasos(1)
 
 
-func cargar(inicio_directo: bool = true, semilla: int = -1) -> void:
+func cargar(inicio_directo: bool = true, semilla: int = -1, con_titulo: bool = false) -> void:
 	paused = false
 	if is_instance_valid(current_scene):
 		current_scene.free()
 	if inicio_directo:
 		set_meta("volcan_inicio_directo", true)
+		# El título del nivel retrasa 4 s el calor y el cronómetro: las pruebas que
+		# no tratan sobre él cargan como un reintento, que no lo muestra.
+		if not con_titulo:
+			set_meta("volcan_reintento", true)
 	mundo = load("res://niveles/mundo/mundo.tscn").instantiate()
 	if semilla >= 0:
 		mundo.get_node("Parkour").semilla = semilla

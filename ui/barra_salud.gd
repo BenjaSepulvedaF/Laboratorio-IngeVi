@@ -29,6 +29,7 @@ func _init() -> void:
 	icono.text = "CALOR"
 	icono.add_theme_font_size_override("font_size", 14)
 	icono.add_theme_color_override("font_color", Color(1, 0.7, 0.35))
+	_contorno(icono)
 	add_child(icono)
 	barra = ProgressBar.new()
 	barra.custom_minimum_size = Vector2(260, 18)
@@ -49,8 +50,16 @@ func _init() -> void:
 	porcentaje = Label.new()
 	porcentaje.add_theme_font_size_override("font_size", 14)
 	porcentaje.custom_minimum_size = Vector2(44, 0)
+	porcentaje.add_theme_color_override("font_color", Color(1, 0.97, 0.92))
+	_contorno(porcentaje)
 	add_child(porcentaje)
 	visible = false # el vestíbulo no tiene calor: la barra solo aparece al conectarla
+
+
+# Contorno oscuro: se lee sobre cualquier fondo.
+func _contorno(etiqueta: Label) -> void:
+	etiqueta.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	etiqueta.add_theme_constant_override("outline_size", 5)
 
 
 func conectar(salud: Salud) -> void:

@@ -33,6 +33,7 @@ func _ready() -> void:
 
 func _on_entrega_terminada(id: String) -> void:
 	if Progreso.completo():
+		Progreso.detener_cronometro()
 		jugador.atenuar_entrega()
 		interfaz.mostrar_menu("VICTORIA")
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)

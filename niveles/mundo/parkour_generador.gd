@@ -89,6 +89,7 @@ func _ready() -> void:
 	_poner_cristal("CristalDescanso", apoyos[INDICE_DESCANSO].position, alturas[INDICE_DESCANSO])
 	for i in desvios.size():
 		_crear_desvio(i + 1, desvios[i])
+	_crear_flechas()
 
 
 func _colocar(i: int) -> void:
@@ -231,6 +232,10 @@ func _construir_desvio(numero: int, base: int, plan: Array, datos: Dictionary) -
 		plataforma.name = "Desvio%d_%d" % [numero, k + 1]
 		plataforma.remove_from_group("apoyos")
 		plataforma.add_to_group("desvios")
+		# Los desvíos no tienen flecha: se descubren por el brillo del cristal.
+		var marca_desvio := plataforma.get_node_or_null("Marca")
+		if marca_desvio:
+			marca_desvio.visible = false
 		var tamano := (plataforma.get_node("CollisionShape3D").shape as BoxShape3D).size
 		plataforma.position = Vector3(plan[k].centro.x, plan[k].altura - tamano.y * 0.5, plan[k].centro.y)
 		plataforma.set_meta("altura_superficie", plan[k].altura)
@@ -349,3 +354,86 @@ func _planear_torre(desde: PhysicsBody3D, direccion: Vector3, sentido: float, re
 		# Espiral: cada piso gira 90° respecto del anterior.
 		dir = dir.rotated(Vector3.UP, sentido * PI * 0.5).snappedf(1.0)
 	return plan
+
+
+# --- Guía visual: flechas sobre el camino ---------------------------------------
+#
+# Geometría direccional: cada plataforma del camino principal (isla, apoyos y
+# torre) tiene una flecha naranja brillante, cerca de su borde, que apunta a la
+# siguiente. Al tomar el orbe todas se dan vuelta y apuntan de regreso, hasta el
+# portal Inicio. Orientan sin texto y contrastan con la roca oscura.
+
+const FLECHA_MARGEN := 0.65 # distancia de la flecha al borde de su plataforma
+
+# Por cada plataforma: {"nodo": flecha, "ida": orientación, "vuelta": orientación}.
+var flechas: Array[Dictionary] = []
+
+
+func _crear_flechas() -> void:
+	var ruta: Array[PhysicsBody3D] = []
+	var isla := get_parent().get_node_or_null("IslaInicial") as PhysicsBody3D
+	if isla:
+		ruta.append(isla)
+	ruta.append_array(apoyos)
+	ruta.append_array(torre)
+	var salida := get_parent().get_node_or_null("PuertaSpawn") as Node3D
+	var material := (get_node("Apoyo01/Marca") as MeshInstance3D).mesh.surface_get_material(0)
+	for k in ruta.size():
+		var plataforma := ruta[k]
+		var marca := plataforma.get_node_or_null("Marca")
+		if marca:
+			marca.visible = false # la marca recta original se reemplaza por la flecha
+		var siguiente: Node3D = ruta[k + 1] if k + 1 < ruta.size() else null
+		var anterior: Node3D = ruta[k - 1] if k > 0 else salida
+		var flecha := _construir_flecha(material)
+		plataforma.add_child(flecha)
+		flechas.append({
+			"nodo": flecha,
+			"ida": _orientacion(plataforma, siguiente),
+			"vuelta": _orientacion(plataforma, anterior),
+		})
+	mostrar_ruta(false)
+
+
+# Una punta de flecha (chevron) hecha con dos barras que se juntan en -Z.
+func _construir_flecha(material: Material) -> Node3D:
+	var flecha := Node3D.new()
+	flecha.name = "Flecha"
+	flecha.scale = Vector3.ONE * 1.3
+	for lado in [-1.0, 1.0]:
+		var barra := MeshInstance3D.new()
+		var malla := BoxMesh.new()
+		malla.size = Vector3(0.1, 0.02, 0.5)
+		malla.material = material
+		barra.mesh = malla
+		barra.rotation.y = lado * 0.7
+		barra.position = Vector3(lado * 0.161, 0, -0.01)
+		flecha.add_child(barra)
+	return flecha
+
+
+# Posición (cerca del borde, sobre la cubierta) y giro para apuntar a "objetivo".
+func _orientacion(plataforma: PhysicsBody3D, objetivo: Node3D) -> Dictionary:
+	if objetivo == null:
+		return {}
+	var direccion := objetivo.global_position - plataforma.global_position
+	direccion.y = 0
+	if direccion.length() < 0.01:
+		return {}
+	direccion = direccion.normalized()
+	var tamano := (plataforma.get_node("CollisionShape3D").shape as BoxShape3D).size
+	var hasta_borde := minf(tamano.x * 0.5 / maxf(absf(direccion.x), 0.001), tamano.z * 0.5 / maxf(absf(direccion.z), 0.001))
+	var posicion := direccion * maxf(hasta_borde - FLECHA_MARGEN, 0.0)
+	posicion.y = tamano.y * 0.5 + 0.035
+	return {"posicion": posicion, "giro": atan2(-direccion.x, -direccion.z), "direccion": direccion}
+
+
+# vuelta = true: las flechas apuntan de regreso (el jugador lleva el orbe).
+func mostrar_ruta(vuelta: bool) -> void:
+	for datos in flechas:
+		var orientacion: Dictionary = datos.vuelta if vuelta else datos.ida
+		var flecha: Node3D = datos.nodo
+		flecha.visible = not orientacion.is_empty()
+		if flecha.visible:
+			flecha.position = orientacion.posicion
+			flecha.rotation.y = orientacion.giro

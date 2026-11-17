@@ -9,8 +9,15 @@ extends Node
 # sellado hasta que se entregue ese orbe.
 #
 # El progreso dura mientras el juego está abierto (no se guarda en disco).
+#
+# También lleva el cronómetro del intento: empieza al entrar al nivel, sigue al
+# cruzar el portal de vuelta (por eso vive aquí y no en una escena) y se detiene
+# al colocar el orbe. Se detiene solo con el juego en pausa (menús).
 
 signal orbe_entregado(id: String)
+# Se emite una vez por segundo, no cada frame: el HUD solo reacciona a esto.
+signal tiempo_cambiado(segundos: int)
+signal cronometro_cambiado(activo: bool)
 
 const NIVELES := [
 	{"id": "volcan", "nombre": "El corazón del volcán", "orbe": "Orbe del volcán"},
@@ -18,6 +25,52 @@ const NIVELES := [
 ]
 
 var entregados: Array[String] = []
+var tiempo := 0.0
+var cronometro_activo := false
+var tiempo_final := 0.0
+var mejor_tiempo := 0.0 # 0 = todavía no hay
+
+
+func _process(delta: float) -> void:
+	if not cronometro_activo:
+		return
+	var antes := int(tiempo)
+	tiempo += delta
+	if int(tiempo) != antes:
+		tiempo_cambiado.emit(int(tiempo))
+
+
+# desde_cero: un reintento vuelve a 0. Si no, solo arranca si estaba detenido
+# (al volver al nivel desde el vestíbulo, el intento sigue corriendo).
+func iniciar_cronometro(desde_cero := false) -> void:
+	if cronometro_activo and not desde_cero:
+		return
+	tiempo = 0.0
+	cronometro_activo = true
+	cronometro_cambiado.emit(true)
+	tiempo_cambiado.emit(0)
+
+
+func detener_cronometro() -> void:
+	if not cronometro_activo:
+		return
+	cronometro_activo = false
+	tiempo_final = tiempo
+	if mejor_tiempo == 0.0 or tiempo_final < mejor_tiempo:
+		mejor_tiempo = tiempo_final
+	cronometro_cambiado.emit(false)
+
+
+# Abandonar el intento (volver al vestíbulo desde un menú).
+func cancelar_cronometro() -> void:
+	cronometro_activo = false
+	tiempo = 0.0
+	cronometro_cambiado.emit(false)
+
+
+static func formato(segundos: float) -> String:
+	var total := int(segundos)
+	return "%d:%02d" % [total / 60, total % 60]
 
 
 func entregar(id: String) -> void:
@@ -60,3 +113,4 @@ func datos(id: String) -> Dictionary:
 
 func reiniciar() -> void:
 	entregados.clear()
+	cancelar_cronometro()

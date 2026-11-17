@@ -38,12 +38,22 @@ El repositorio cuenta con un archivo `.gitignore` configurado adecuadamente para
 
 ### Cómo completar el nivel
 
-1. **Inicio:** en el vestíbulo, cruza el portal **Parkour**.
+1. **Inicio:** en el vestíbulo, cruza el portal **Parkour**. Aparece el título del nivel, **Capítulo I: El corazón del volcán**, con dos líneas de contexto. Mientras se muestra, el calor y el cronómetro esperan.
 2. Cruza los cuatro sectores, sube la **torre del orbe** y recoge el orbe de su cima con **E** (o **X** en mando).
 3. Vuelve por el mismo camino hasta la isla inicial y cruza el portal **Inicio**.
 4. **Final:** en el vestíbulo, coloca el orbe en su pedestal del **monumento** (E / X). Aparece **Orbe colocado**: es la victoria. **Jugar de nuevo** borra el progreso.
 
 La lava es letal y el calor gasta tu resistencia: si se acaba, el intento termina (**Reintentar** o **Volver al vestíbulo**).
+
+**Guía visual:** cada plataforma del camino tiene una **flecha naranja brillante** que apunta a la siguiente (geometría direccional y contraste de color sobre la roca oscura). Al tomar el orbe, todas se dan vuelta y apuntan de regreso, hasta el portal Inicio. Los desvíos no tienen flechas: se descubren por el brillo azul de sus cristales.
+
+**HUD:**
+
+- **Barra CALOR:** la resistencia. Cambia de color, late en rojo con poca resistencia y destella al recuperarse.
+- **Cristales de agua: N / 4:** crece y brilla al sumar uno.
+- **Tiempo:** el cronómetro del intento. Sigue corriendo al volver al vestíbulo y se detiene al colocar el orbe.
+
+Todos se actualizan por señales (patrón Observer), no consultando el estado cada frame. La pantalla de victoria muestra el tiempo final y el mejor tiempo de la sesión.
 
 **Monumento de los orbes:** cada nivel guarda un orbe, y el monumento tiene un pedestal por nivel. Colocar un orbe desbloquea el portal del nivel siguiente; colocar el del último nivel es la victoria. Por ahora el volcán es el único nivel, así que su orbe da la victoria. El cristal central del monumento brilla más con cada orbe colocado.
 
@@ -143,6 +153,6 @@ godot --headless --path . --script res://tests/test_cristales.gd --fixed-fps 120
 godot --headless --path . --script res://tests/test_monumento.gd --fixed-fps 120
 ```
 
-Las pruebas cubren transferencias del orbe, lava, reintentos, cámaras, pausa, entrega y victoria; caras y esquinas agarrables, obstrucciones, soltarse y ausencia de límite de tiempo; los 74 saltos individuales de ida/vuelta (incluida la torre); y un viaje continuo desde la aparición hasta la victoria en el monumento del vestíbulo, con viento y calor activos. En la prueba continua el jugador usa las acciones de movimiento y salto, sin teletransportes ni cambios artificiales de velocidad. `test_inestables` comprueba el temblor, la caída por física, la reaparición, el derrumbe estando colgado y las acciones con mando (botones y sticks). `test_monumento` comprueba el paso del orbe entre escenas, la entrega en el monumento, la victoria, jugar de nuevo y los portales sellados.
+Las pruebas cubren transferencias del orbe, lava, reintentos, cámaras, pausa, entrega y victoria; caras y esquinas agarrables, obstrucciones, soltarse y ausencia de límite de tiempo; los 74 saltos individuales de ida/vuelta (incluida la torre); y un viaje continuo desde la aparición hasta la victoria en el monumento del vestíbulo, con viento y calor activos. En la prueba continua el jugador usa las acciones de movimiento y salto, sin teletransportes ni cambios artificiales de velocidad. `test_inestables` comprueba el temblor, la caída por física, la reaparición, el derrumbe estando colgado y las acciones con mando (botones y sticks). `test_monumento` comprueba el paso del orbe entre escenas, la entrega en el monumento, la victoria, jugar de nuevo, los portales sellados, el título del nivel, el cronómetro (incluida la pausa y el reintento) y que todas las flechas apunten bien, de ida y de vuelta.
 
 `test_viaje` usa un mapa aleatorio y a veces falla porque el bot se demora en una plataforma inestable o falla un salto puntual. Si falla, vuelve a ejecutarla.

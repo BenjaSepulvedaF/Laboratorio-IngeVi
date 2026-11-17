@@ -4,6 +4,7 @@ signal jugar_solicitado
 signal reinicio_solicitado
 signal pausa_solicitada
 signal vestibulo_solicitado
+signal titulo_terminado
 
 const SONIDO_CLICK = preload("res://assets/audio/click_menu.wav")
 const SONIDO_PAUSA = preload("res://assets/audio/pausa.wav")
@@ -23,6 +24,13 @@ var contador_cristales: Label
 var tween_cristales: Tween
 var boton_vestibulo: Button
 var tween_fondo: Tween
+var cronometro: Label
+var tarjeta_titulo: Control
+var panel_agarre: PanelContainer
+var tween_titulo: Tween
+var tarjeta_capitulo: Label
+var tarjeta_nombre: Label
+var tarjeta_texto: Label
 # La fija partida.gd antes de mostrar la derrota: "calor", "lava" o "caida".
 var causa_derrota := ""
 # Solo los niveles ofrecen volver al vestíbulo (en el vestíbulo no tiene sentido).
@@ -61,38 +69,88 @@ func _texto(contenido: String, tamano: int, color: Color) -> Label:
 	return texto
 
 
+# Texto del HUD: con contorno oscuro para leerse sobre cualquier fondo
+# (el cielo claro del vestíbulo o la lava brillante del volcán).
+func _texto_hud(contenido: String, tamano: int, color: Color) -> Label:
+	var texto := _texto(contenido, tamano, color)
+	texto.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	texto.add_theme_constant_override("outline_size", 5)
+	return texto
+
+
+# Panel del HUD: fondo oscuro semitransparente con borde fino, el mismo estilo de
+# los menús. Da contraste igual en todos los escenarios sin ajustar nada por nivel.
+func _panel_hud(alineacion: Control.SizeFlags) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.size_flags_horizontal = alineacion
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.045, 0.03, 0.035, 0.74)
+	estilo.border_color = Color(1, 0.55, 0.2, 0.45)
+	estilo.set_border_width_all(1)
+	estilo.set_corner_radius_all(10)
+	estilo.content_margin_left = 16
+	estilo.content_margin_right = 16
+	estilo.content_margin_top = 10
+	estilo.content_margin_bottom = 10
+	panel.add_theme_stylebox_override("panel", estilo)
+	return panel
+
+
 func _construir() -> void:
 	hud = MarginContainer.new()
 	hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	hud.add_theme_constant_override("margin_left", 28)
-	hud.add_theme_constant_override("margin_top", 24)
-	hud.add_theme_constant_override("margin_right", 28)
-	hud.add_theme_constant_override("margin_bottom", 24)
+	hud.add_theme_constant_override("margin_left", 24)
+	hud.add_theme_constant_override("margin_top", 20)
+	hud.add_theme_constant_override("margin_right", 24)
+	hud.add_theme_constant_override("margin_bottom", 20)
 	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(hud)
 	var columna := VBoxContainer.new()
 	columna.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(columna)
-	columna.add_child(_texto("EL CORAZÓN DEL VOLCÁN", 14, Color(1, 0.7, 0.35)))
-	objetivo = _texto("Recorre las plataformas y recupera el orbe.", 18, Color(0.95, 0.93, 0.88))
-	columna.add_child(objetivo)
+	# Panel de estado (arriba a la izquierda): objetivo, calor, cristales y tiempo.
+	var panel_estado := _panel_hud(Control.SIZE_SHRINK_BEGIN)
+	columna.add_child(panel_estado)
+	var estado := VBoxContainer.new()
+	estado.add_theme_constant_override("separation", 6)
+	estado.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel_estado.add_child(estado)
+	estado.add_child(_texto_hud("EL CORAZÓN DEL VOLCÁN", 13, Color(1, 0.7, 0.35)))
+	objetivo = _texto_hud("Recorre las plataformas y recupera el orbe.", 18, Color(1, 0.97, 0.92))
+	estado.add_child(objetivo)
 	barra_salud = BarraSalud.new()
-	columna.add_child(barra_salud)
-	contador_cristales = _texto("", 16, Color(0.55, 0.9, 1.0))
+	estado.add_child(barra_salud)
+	contador_cristales = _texto_hud("", 16, Color(0.55, 0.92, 1.0))
 	contador_cristales.visible = false
-	columna.add_child(contador_cristales)
+	estado.add_child(contador_cristales)
+	# Cronómetro del intento: lo lleva Progreso y avisa una vez por segundo.
+	cronometro = _texto_hud("", 16, Color(1, 0.97, 0.92))
+	estado.add_child(cronometro)
+	_on_cronometro_cambiado(Progreso.cronometro_activo)
+	_on_tiempo_cambiado(int(Progreso.tiempo))
+	Progreso.tiempo_cambiado.connect(_on_tiempo_cambiado)
+	Progreso.cronometro_cambiado.connect(_on_cronometro_cambiado)
 	var espacio := Control.new()
 	espacio.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	espacio.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	columna.add_child(espacio)
-	ayuda_borde = _texto("", 23, Color(0.5, 0.95, 1))
+	# Ayuda al colgarse (centro): solo aparece cuando hace falta.
+	panel_agarre = _panel_hud(Control.SIZE_SHRINK_CENTER)
+	panel_agarre.visible = false
+	columna.add_child(panel_agarre)
+	ayuda_borde = _texto_hud("", 22, Color(0.55, 0.95, 1))
 	ayuda_borde.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ayuda_borde.visible = false
-	columna.add_child(ayuda_borde)
-	ayuda_controles = _texto("", 14, Color(0.9, 0.87, 0.8))
-	columna.add_child(ayuda_controles)
+	panel_agarre.add_child(ayuda_borde)
+	# Controles (abajo, centrados).
+	var panel_controles := _panel_hud(Control.SIZE_SHRINK_CENTER)
+	columna.add_child(panel_controles)
+	ayuda_controles = _texto_hud("", 14, Color(0.95, 0.92, 0.86))
+	panel_controles.add_child(ayuda_controles)
 	_actualizar_ayudas()
 	Dispositivo.cambiado.connect(func(_mando): _actualizar_ayudas())
+	_construir_tarjeta_titulo()
 	fondo = ColorRect.new()
 	fondo.color = Color(0.025, 0.018, 0.025, 0.82)
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -169,6 +227,77 @@ func mostrar_cristales(recogidos: int, total: int) -> void:
 	tween_cristales.tween_property(contador_cristales, "modulate", Color.WHITE, 0.4)
 
 
+func _on_tiempo_cambiado(segundos: int) -> void:
+	cronometro.text = "Tiempo  " + Progreso.formato(segundos)
+
+
+func _on_cronometro_cambiado(activo: bool) -> void:
+	cronometro.visible = activo
+
+
+# Título del nivel (elemento narrativo): aparece al entrar, se sostiene y se
+# desvanece. No bloquea el juego; avisa con titulo_terminado al desaparecer.
+func _construir_tarjeta_titulo() -> void:
+	tarjeta_titulo = CenterContainer.new()
+	tarjeta_titulo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tarjeta_titulo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tarjeta_titulo.visible = false
+	add_child(tarjeta_titulo)
+	# Panel detrás del título, con el mismo estilo del HUD pero más amplio.
+	var fondo_titulo := _panel_hud(Control.SIZE_SHRINK_CENTER)
+	var estilo_titulo := fondo_titulo.get_theme_stylebox("panel") as StyleBoxFlat
+	estilo_titulo.bg_color.a = 0.62
+	estilo_titulo.content_margin_left = 48
+	estilo_titulo.content_margin_right = 48
+	estilo_titulo.content_margin_top = 26
+	estilo_titulo.content_margin_bottom = 28
+	tarjeta_titulo.add_child(fondo_titulo)
+	var caja := VBoxContainer.new()
+	caja.add_theme_constant_override("separation", 10)
+	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fondo_titulo.add_child(caja)
+	tarjeta_capitulo = _texto("", 18, Color(1, 0.66, 0.3))
+	tarjeta_nombre = _texto("", 52, Color(1, 0.96, 0.88))
+	tarjeta_texto = _texto("", 19, Color(0.9, 0.86, 0.82))
+	for etiqueta in [tarjeta_capitulo, tarjeta_nombre, tarjeta_texto]:
+		etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		etiqueta.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		etiqueta.add_theme_constant_override("outline_size", 10)
+		caja.add_child(etiqueta)
+
+
+func mostrar_titulo(capitulo: String, nombre: String, texto: String) -> void:
+	tarjeta_capitulo.text = capitulo
+	tarjeta_nombre.text = nombre
+	tarjeta_texto.text = texto
+	tarjeta_titulo.visible = true
+	tarjeta_titulo.modulate.a = 0.0
+	tween_titulo = create_tween()
+	# STOP: si se pausa el juego durante el título, el título también se detiene.
+	tween_titulo.set_pause_mode(Tween.TWEEN_PAUSE_STOP)
+	tween_titulo.tween_property(tarjeta_titulo, "modulate:a", 1.0, 0.7)
+	tween_titulo.tween_interval(4.5) # tiempo para leer las dos líneas con calma
+	_terminar_titulo(0.9)
+
+
+# Desvanece el título y avisa. Se usa al final normal y al saltarlo.
+func _terminar_titulo(duracion: float) -> void:
+	tween_titulo.tween_property(tarjeta_titulo, "modulate:a", 0.0, duracion)
+	tween_titulo.tween_callback(func():
+		tarjeta_titulo.visible = false
+		titulo_terminado.emit())
+
+
+# Saltar el título (con Saltar o Interactuar): útil al volver a entrar al nivel.
+func saltar_titulo() -> void:
+	if not tarjeta_titulo.visible or get_tree().paused:
+		return
+	tween_titulo.kill()
+	tween_titulo = create_tween()
+	tween_titulo.set_pause_mode(Tween.TWEEN_PAUSE_STOP)
+	_terminar_titulo(0.3)
+
+
 func conectar_salud(salud: Salud) -> void:
 	barra_salud.conectar(salud)
 
@@ -203,7 +332,8 @@ func mostrar_menu(estado: String) -> void:
 			boton_principal.text = "Reintentar"
 		"VICTORIA":
 			titulo.text = "Orbe colocado"
-			descripcion.text = "El monumento vuelve a arder:\nhas recuperado el corazón del volcán."
+			descripcion.text = "El monumento vuelve a arder:\nhas recuperado el corazón del volcán.\n\nTiempo: %s   ·   Mejor: %s" % [
+				Progreso.formato(Progreso.tiempo_final), Progreso.formato(Progreso.mejor_tiempo)]
 			boton_principal.text = "Jugar de nuevo"
 			sonido_victoria.play()
 	boton_principal.grab_focus()
@@ -233,6 +363,7 @@ func mostrar_objetivo(lugar: String) -> void:
 
 func mostrar_agarre(activo: bool) -> void:
 	ayuda_borde.visible = activo
+	panel_agarre.visible = activo
 
 
 func _principal() -> void:
@@ -245,6 +376,10 @@ func _principal() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if tarjeta_titulo.visible and (event.is_action_pressed("saltar") or event.is_action_pressed("interactuar")):
+		saltar_titulo()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("pausa"):
 		pausa_solicitada.emit()
 		get_viewport().set_input_as_handled()

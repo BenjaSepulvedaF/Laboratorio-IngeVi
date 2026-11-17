@@ -9,10 +9,20 @@ const ID_NIVEL := "volcan"
 const AUTO_INICIO := &"volcan_inicio_directo"
 const ORBE_LLEVADO := &"volcan_orbe_llevado"
 const VESTIBULO := "res://niveles/spawn/spawn.tscn"
+# Marca de "Reintentar": la recarga no repite el título y el cronómetro vuelve a 0.
+const REINTENTO := &"volcan_reintento"
+# Título del nivel (elemento narrativo, opción D): sitúa al jugador al entrar.
+const CAPITULO := "C A P Í T U L O   I"
+const NOMBRE := "El corazón del volcán"
+const CONTEXTO := "El orbe que mantenía vivo el monumento yace en lo alto del volcán.\nCruza la lava antes de que el calor te consuma, y tráelo de vuelta."
 
 var estado: Estado = Estado.INICIO
 var estado_antes_pausa: Estado = Estado.JUGANDO
 var cristales_recogidos := 0
+var reintento := false
+# Mientras se muestra el título, el jugador no se mueve y el calor y el
+# cronómetro esperan: así nadie gana ventaja mientras lee.
+var en_titulo := false
 @onready var jugador = $Jugador
 @onready var origen = $AltarRecoger
 @onready var interfaz = $Interfaz
@@ -49,12 +59,38 @@ func _ready() -> void:
 		_establecer_orbe("entregado")
 	else:
 		_establecer_orbe("espalda" if llevado == ID_NIVEL else "origen")
+	reintento = get_tree().has_meta(REINTENTO)
+	if reintento:
+		get_tree().remove_meta(REINTENTO)
 	if get_tree().has_meta(AUTO_INICIO):
 		get_tree().remove_meta(AUTO_INICIO)
+		if not reintento:
+			_mostrar_titulo()
 		_jugar()
 	else:
 		jugador.bloquear()
 		_menu(Estado.INICIO)
+
+
+func _mostrar_titulo() -> void:
+	en_titulo = true
+	interfaz.mostrar_titulo(CAPITULO, NOMBRE, CONTEXTO)
+	interfaz.titulo_terminado.connect(_fin_titulo, CONNECT_ONE_SHOT)
+
+
+func _fin_titulo() -> void:
+	en_titulo = false
+	if estado == Estado.JUGANDO:
+		jugador.desbloquear()
+		calor.activo = true
+		_iniciar_cronometro()
+
+
+func _iniciar_cronometro() -> void:
+	# Un reintento empieza de 0; si se vuelve desde el vestíbulo con el intento en
+	# curso (por ejemplo, con el orbe), el cronómetro sigue corriendo.
+	Progreso.iniciar_cronometro(reintento)
+	reintento = false
 
 
 func _jugar() -> void:
@@ -62,9 +98,13 @@ func _jugar() -> void:
 		estado = estado_antes_pausa
 	else:
 		estado = Estado.JUGANDO
-		jugador.desbloquear()
+		if en_titulo:
+			jugador.bloquear()
+		else:
+			jugador.desbloquear()
+			_iniciar_cronometro()
 	get_tree().paused = false
-	calor.activo = estado == Estado.JUGANDO
+	calor.activo = estado == Estado.JUGANDO and not en_titulo
 	interfaz.cerrar_menu()
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
@@ -117,6 +157,8 @@ func _establecer_orbe(lugar: String) -> void:
 	origen.habilitado = lugar == "origen"
 	origen.actualizar_etiqueta()
 	interfaz.mostrar_objetivo(lugar)
+	# Con el orbe en la espalda, las flechas del camino apuntan de regreso.
+	$Parkour.mostrar_ruta(lugar == "espalda")
 
 
 func _interactuar(altar: Node3D, actor: CharacterBody3D) -> void:
@@ -133,12 +175,14 @@ func _interactuar(altar: Node3D, actor: CharacterBody3D) -> void:
 func _volver_al_vestibulo() -> void:
 	# Volver desde un menú cuenta como abandonar el intento: el orbe no se lleva.
 	get_tree().set_meta(ORBE_LLEVADO, "")
+	Progreso.cancelar_cronometro()
 	get_tree().paused = false
 	get_tree().change_scene_to_file.call_deferred(VESTIBULO)
 
 
 func reiniciar() -> void:
 	get_tree().set_meta(AUTO_INICIO, true)
+	get_tree().set_meta(REINTENTO, true)
 	get_tree().paused = false
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	var error := get_tree().reload_current_scene()
